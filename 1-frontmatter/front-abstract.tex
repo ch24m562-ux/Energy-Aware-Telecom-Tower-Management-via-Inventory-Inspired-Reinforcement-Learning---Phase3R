@@ -1,0 +1,70 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+\begin{tabular}{@{} >{\bfseries}p{0.2\textwidth} p{0.77\textwidth} @{}}
+\texorpdfstring{\MakeUppercase{Keywords}}{Keywords} &
+telecom tower sites; hybrid energy systems; solar PV; battery storage;
+diesel logistics; reinforcement learning; constrained Markov decision process;
+inventory management; action masking; Expected Energy Not Served (EENS);
+model predictive control
+\end{tabular}
+\par
+\begin{doublespacing}
+
+Reliable and low-carbon energy management for hybrid telecom tower sites
+remains a critical challenge in regions with weak or intermittent electricity
+supply. Conventional rule-based controllers and offline optimisation
+approaches rely on fixed thresholds and deterministic assumptions,
+making them unable to adapt to stochastic solar generation, grid outages, and
+fuel logistics uncertainty.
+
+This thesis studies the operational control of hybrid
+solar--battery--diesel telecom tower systems under uncertainty in renewable
+generation, grid availability, and diesel delivery. The problem is formulated
+as a Constrained Markov Decision Process (CMDP) that explicitly models
+battery operating constraints and diesel inventory dynamics, including diesel replenishment ordering and stochastic delivery lead times.
+
+A data-grounded simulation environment is developed using the ITU~2024
+Smart Energy Scheduling dataset, comprising operational traces from ten
+telecom base station sites at hourly resolution. Reinforcement learning
+policies are trained with hard action masking that prevents infeasible control actions at each decision step.
+
+The proposed RLInv framework is evaluated
+against eight comparator policies spanning rule-based,
+reinforcement learning, and optimisation-based approaches, including a
+receding-horizon Model Predictive Control (MPC) baseline and an
+optimistic perfect-information Oracle-MPC reference. The evaluation
+covers ten sites and four
+delivery-logistics scenarios of increasing severity, with the learned
+policies trained across ten independent seeds and paired
+training-seed statistical comparisons for the primary policy and
+ablation analyses.
+
+Across the four logistics scenarios, RLInv achieves the lowest mean
+Expected Energy Not Served (EENS) under Normal and Extreme logistics,
+and is not statistically distinguishable from the closest comparator
+under Delayed or Monsoon conditions. Overall,
+these results indicate that RLInv's performance cannot be attributed to
+superior dispatch or forecasting alone. The gap to Oracle-MPC, which
+assumes perfect future information, is largest under Monsoon conditions
+but narrows again under Extreme logistics, where physical fuel
+availability increasingly constrains all policies.
+
+Isolating the contribution of jointly learned replenishment through a
+cleaner practical replenishment comparison shows that its benefit is
+scenario-dependent rather
+than universal. It is statistically significant under Normal and Extreme
+logistics stress but is not distinguishable from a classical ordering
+rule under Delayed or moderate (Monsoon)
+logistics stress. The cleaner masking ablation finds no statistically
+distinguishable mean-EENS effect when replenishment is learned jointly,
+while a larger architecture-dependent gap appears under stressed
+logistics in the decomposed-control comparison.
+
+Together, these findings indicate that jointly learning diesel
+replenishment and energy dispatch enables reinforcement learning to
+exploit sequential inventory--logistics interactions that are difficult
+to capture through fixed rule-based coordination under uncertain fuel
+delivery.
+
+\end{doublespacing}

@@ -1,0 +1,75 @@
+\label{app:gantt}
+
+This appendix summarises the execution timeline of the thesis across
+its three research phases. Phase~I focused on problem formulation and
+simulator design, Phase~II on implementation, training, and initial
+evaluation, and Phase~III on expanding the experimental evidence through
+robustness studies, optimisation-based comparisons, reviewer-driven
+extensions, and comprehensive thesis verification.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{ganttchart}[
+    hgrid,
+    vgrid={*{3}{draw=none}, dotted},
+    time slot format=isodate,
+    time slot unit=day,
+    x unit=0.024cm,
+    y unit title=0.6cm,
+    y unit chart=0.55cm,
+    title height=1,
+    title label font=\scriptsize\bfseries,
+    bar label font=\scriptsize,
+    bar label node/.append style={align=left, text width=4.2cm},
+    group label font=\scriptsize\bfseries,
+    group label node/.append style={align=left, text width=4.2cm},
+    bar/.append style={fill=blue!40, rounded corners=1pt},
+    group/.append style={fill=black!70},
+    milestone/.append style={fill=red!70, shape=diamond},
+    today=2026-07-12,
+    today rule/.style={draw=red!80, line width=1pt, dashed},
+    today label=\scriptsize Final submission,
+    canvas/.append style={draw=black!20}
+]{2025-10-01}{2026-07-31}
+
+% ── Month labels ──────────────────────────────────────────
+\gantttitle{Oct}{31}
+\gantttitle{Nov}{30}
+\gantttitle{Dec}{31}
+\gantttitle{Jan}{31}
+\gantttitle{Feb}{28}
+\gantttitle{Mar}{31}
+\gantttitle{Apr}{30}
+\gantttitle{May}{31}
+\gantttitle{Jun}{30}
+\gantttitle{Jul}{31} \\
+
+% ── PHASE I ──────────────────────────────────────────────
+\ganttgroup{Phase I: Formulation \& Design}{2025-10-01}{2025-12-31} \\
+\ganttbar{Literature review \& CMDP formulation}{2025-10-01}{2025-11-30} \\
+\ganttbar{Simulator design}{2025-11-01}{2025-12-20} \\
+\ganttbar{Phase~I thesis writing}{2025-12-01}{2025-12-31} \\
+\ganttmilestone{Phase~I submitted}{2025-12-31} \\[grid]
+
+% ── PHASE II ─────────────────────────────────────────────
+\ganttgroup{Phase II: Implementation \& Evaluation}{2026-01-01}{2026-03-11} \\
+\ganttbar{Implementation (dataset, simulator, RLInv, TrackB)}{2026-01-01}{2026-02-20} \\
+\ganttbar{Training \& evaluation}{2026-02-01}{2026-03-05} \\
+\ganttbar{Thesis writing \& revision}{2026-02-28}{2026-03-11} \\
+\ganttmilestone{Phase~II submitted}{2026-03-11} \\[grid]
+
+% ── PHASE III ────────────────────────────────────────────
+\ganttgroup{Phase III: Evidence Expansion \& Final Verification}{2026-04-01}{2026-07-12} \\
+\ganttbar{Full evaluation campaign \& robustness studies}{2026-04-01}{2026-05-31} \\
+\ganttbar{Reviewer-driven extensions (RLInv-DA)}{2026-06-01}{2026-06-20} \\
+\ganttbar{Final verification \& thesis assembly}{2026-06-15}{2026-07-12} \\
+\ganttmilestone{Final submission}{2026-07-12}
+
+\end{ganttchart}%
+}
+\caption{Thesis execution timeline across three phases: formulation and
+design, implementation and evaluation, and final evidence expansion and
+verification. The red dashed line marks the final submission date.}
+\label{fig:gantt}
+\end{figure}

@@ -1,0 +1,416 @@
+\chapter{Introduction}
+\label{chap:introduction}
+
+% ============================================================
+\section{Background and Motivation}
+% ============================================================
+
+Information and Communication Technology (ICT) has become a foundational
+pillar of the global digital economy, supporting mobile connectivity, cloud
+services, digital governance, and other critical infrastructure. As of 2025,
+mobile networks serve approximately 5.7 billion unique subscribers
+worldwide, representing over 70\% of the global population
+\citep{gsma2025_mobile_economy}. Continued growth in mobile data demand and
+the expansion of 4G and 5G networks are placing increasing pressure on the
+energy consumption of telecom infrastructure.
+
+At the core of this infrastructure lies the \textbf{telecom tower site} (or
+base transceiver station, BTS site), which must operate continuously to
+maintain uninterrupted service. A typical multi-technology tower consumes
+2--8\,kW continuously, making the Radio Access Network (RAN) responsible for
+60--80\% of a mobile operator's total electricity demand
+\citep{americas2023_energy_efficiency}. In developing regions such as India
+and Sub-Saharan Africa, unreliable grid access means that many towers rely
+heavily on diesel generators and battery banks to maintain service continuity
+\citep{gsma2020_tower_esco}. Diesel fuel represents 25--30\% of tower OPEX,
+rising to 70\% at remote sites \citep{datoms2024,gsma2020_tower_esco}.
+
+Fuel logistics failures---through pilferage, stockouts, and delivery
+disruptions---pose significant risks to tower reliability; the 2025 threat
+to 16{,}000 Nigerian sites underscores diesel supply-chain vulnerability
+\citep{datoms2024,alton2025}. In weak-grid regions, the resulting reliance
+on diesel generators drives both high operating costs and substantial carbon
+emissions. In the Indian context, a typical macro BTS site operating a
+diesel generator for approximately eight hours per day consumes about
+8{,}760\,L of diesel annually, corresponding to approximately
+23--24\,t CO\textsubscript{2} per site per year when using a standard
+emission factor of 2.68\,kg\,CO\textsubscript{2} per litre of diesel
+\citep{trai2011_green_telecom,ghgprotocol2017_emission_factors}.
+
+Global sustainability commitments further increase the need to reduce
+diesel dependence. The GSMA Climate Action roadmaps and major operators
+target net-zero emissions by 2040--2050, while diesel-powered sites remain
+one of the largest controllable sources of Scope\,1 emissions
+\citep{gsma2023}. Hybrid renewable systems (solar PV + battery + diesel)
+have demonstrated 20--65\% reductions in diesel consumption and
+CO\textsubscript{2} emissions in field deployments
+\citep{gsma2020_tower_esco,datoms2024}. However, maximising these savings
+under stochastic solar irradiance, traffic-driven loads, and grid outages
+requires more sophisticated control than current rule-based systems.
+
+In India---the world's second-largest mobile market with over
+1.2 billion subscribers and over
+800{,}000 tower sites \citep{dot2024_towers}---the challenge is particularly
+acute. Rural and semi-urban grid availability often falls below 14 hours per
+day, making diesel dominant at many sites \citep{trai2024,datoms2024}.
+Aggressive 5G rollout and renewable energy mandates intensify pressure for
+low-carbon hybrid transitions while controlling OPEX.
+
+
+% ============================================================
+\section{Current Practices and Their Limitations}
+% ============================================================
+
+Industry-standard energy management today relies predominantly on
+\textbf{rule-based} or \textbf{threshold-driven controllers} embedded in
+Power Management Units (PMUs) or Hybrid Power Controllers (HPCs). Typical
+rules include: use solar whenever available; switch to battery when the grid
+fails; and start the diesel generator if battery State-of-Charge (SoC) falls
+below 30\%.
+
+These heuristics are simple, robust, and inexpensive, but they are
+fundamentally \emph{myopic}: they ignore long-term fuel cost, battery
+degradation cost, forecasted outages, variable diesel prices, and potential
+carbon penalties. Tools such as \textbf{HOMER Pro} are widely used for system
+design and planning. They can produce static daily dispatch schedules and size
+PV/DG/battery systems that reduce diesel use by 30--58\%, yet they operate
+offline, typically under deterministic or average conditions, and cannot adapt
+in real time to uncertainty \citep{homer_energy_2020,meena2020_homer_telecom}.
+
+More advanced approaches---such as Model Predictive Control (MPC), stochastic
+programming, and classical optimisation---improve performance by explicitly
+optimising over a rolling horizon. MPC and related methods require an
+explicit system model, suitable forecasts, and repeated online
+optimisation; their effectiveness therefore depends on model and forecast
+quality as well as the available controller resources.
+
+Reinforcement Learning (RL) has recently shown strong results in microgrids,
+electric vehicles, and building energy management, where agents learn to trade
+off cost and reliability under uncertainty
+\citep{mao2021_inventory_rl,lin_ev_rl_2024,wang2022_building_rl}. Recent
+work specifically on telecom base station energy management has demonstrated
+18--47\% reductions in operating cost relative to rule-based and MPC baselines
+\citep{ma_pan_2025_telecom_ies,yan_2025_safe_marl_bs,alhajhassan_2024_battery_ageing_rl}.
+However, an important modelling gap remains across this body of work: diesel fuel is
+generally treated as an always-available, unconstrained resource. To the best
+of the author's knowledge, no prior RL formulation for telecom towers models
+the diesel tank level as a finite depletable stock or treats replenishment
+ordering as a control action. Existing formulations also do not account for
+stochastic delivery lead times and their interaction with dispatch decisions.
+Most existing approaches optimise dispatch and fuel replenishment
+independently, despite the operational coupling between diesel consumption
+and future inventory availability under uncertain delivery lead times. This
+gap motivates the
+methodology adopted in this thesis. The following chapter reviews related
+work across telecom energy management, microgrid scheduling, and
+inventory-aware control, and positions the proposed formulation relative
+to existing approaches.
+
+
+% ============================================================
+\section{Research Problem and Objectives}
+% ============================================================
+
+The problem addressed here is how to coordinate energy resources
+and diesel replenishment in hybrid telecom towers under significant uncertainty
+in solar generation, grid availability, and diesel delivery, so as to minimise
+unserved energy and operational expenditure while improving service
+reliability and respecting operational constraints.
+
+The central research question is:
+
+\begin{quote}
+\emph{Does jointly learning diesel ordering and energy dispatch within a single
+reinforcement-learning agent reduce unserved energy at remote telecom
+base stations relative to approaches that treat these decisions separately ---
+including both classical rule-based decomposition and optimisation-based
+dispatch?}
+\end{quote}
+
+To answer this question, the thesis formulates the problem as a
+\textbf{Constrained Markov Decision Process (CMDP)} and evaluates three
+hypotheses. The empirical evaluation focuses on reliability
+measured through \textbf{Expected Energy Not Served (EENS)} and related
+operational metrics, and deliberately includes a Model Predictive Control
+(MPC) baseline and a perfect-information Oracle-MPC reference alongside the
+reinforcement-learning comparators, so that the effects of replenishment
+learning, dispatch quality, forecasting, and action masking can be
+examined separately:
+
+\begin{description}
+  \item[H1 (Joint ordering).] Does joint learning of dispatch and diesel
+  ordering reduce unserved energy relative to a classical $(s,S)$ ordering
+  policy, when dispatch policies remain broadly comparable despite the
+  reduced action space?
+\item[H2 (Action masking).] Does hard action masking improve dispatch-policy
+robustness under stressed logistics, and does its effect depend on whether
+diesel replenishment is externally managed or learned jointly?
+  \item[H3 (Logistics-observation hypothesis).] Does removing the five inventory- and
+  delivery-related observation channels reduce reliability relative to the
+  full RLInv observation space?
+\end{description}
+
+The specific objectives of this work are to:
+
+\begin{enumerate}
+  \item Formulate the hybrid telecom tower energy management problem as a CMDP
+  that treats battery state-of-charge and diesel fuel level as coupled
+  state variables under uncertain supply and demand, with diesel
+  modelled as a \textbf{finite replenishable inventory} subject to stochastic
+  delivery lead times.
+
+  \item Design and train reinforcement learning agents capable of jointly
+  learning energy dispatch and diesel replenishment strategies under
+  operational constraints, alongside decomposed control baselines in
+  which ordering and dispatch are learned or optimised separately.
+
+  \item Develop a Gymnasium-compatible simulation environment driven by real
+  ITU/Zindi telecom site traces that reproduces empirically grounded load,
+  PV generation, and grid availability dynamics at hourly resolution.
+
+  \item Benchmark the learned RL policies against rule-based,
+  decomposition-based, and optimisation-based baselines --- including MPC and
+  a perfect-information Oracle-MPC reference --- across ten sites and four
+  delivery-logistics scenarios of increasing severity, with the learned
+  policies trained across ten independent seeds. Quantify improvements in
+  unserved energy, diesel
+  consumption, and operational reliability, with paired seed-level
+  statistical analysis for the core policy and ablation comparisons.
+\end{enumerate}
+
+
+% ============================================================
+\section{Contributions}
+% ============================================================
+
+The main contributions of this thesis are:
+
+\begin{enumerate}
+  \item A telecom-tower-specific, inventory-theoretic CMDP formulation that
+  explicitly represents battery state-of-charge and diesel fuel volume as
+  state variables subject to uncertain demand, stochastic replenishment lead
+  times, and operational cost, reliability, and feasibility penalties.
+
+  \item The design and empirical evaluation of a constrained reinforcement
+  learning framework---\textbf{RLInv}---for hybrid telecom tower energy
+  management, including inventory-aware state and action design with hard
+action masking to prevent infeasible control actions. RLInv is benchmarked against
+  a dispatch-only RL policy with externally
+  managed replenishment (TrackB), optimisation-based dispatch policies
+  (MPC and Oracle-MPC), and the A6 ablation. The RLInv--A6
+  comparison provides a cleaner practical replenishment comparison than
+  TrackB, while the reduced dispatch action space used by A6 remains an
+  acknowledged design difference, not present in
+  the RL-based telecom energy management literature reviewed in
+  Chapter~\ref{chap:literature}.
+
+  \item A reproducible simulation environment and experimental protocol
+  integrating the ITU~2024 Smart Energy Scheduling dataset (ten base station
+  sites, 60~days each) with a synthetic lead-time overlay, evaluated across
+  four delivery-logistics scenarios with the learned policies trained across
+  ten independent seeds, with
+  paired seed-level statistical analysis for the core policy and ablation
+  comparisons.
+
+  \item A scenario-dependent empirical characterisation of when joint
+  optimisation is beneficial: the H1 comparison favours RLInv under the Normal
+and Extreme logistics scenarios, while no statistically distinguishable advantage
+  is observed under Delayed or Monsoon conditions.
+  
+   \item A larger architecture-dependent gap is observed under stressed
+  logistics in the externally managed replenishment comparison
+  (A6 vs.\ TrackB), while the cleaner RLInv--A7 comparison finds no
+  measurable independent mean-EENS benefit from masking when
+  replenishment is already learned jointly.
+
+  \item An exploratory extension investigating explicit delivery-delay
+  tracking (RLInv-DA) is also reported: explicit
+  delay awareness did not provide a consistent improvement over RLInv under
+  the tested conditions.
+\end{enumerate}
+
+
+% ============================================================
+\section{Scope and Limitations}
+% ============================================================
+
+To maintain focus and analytical tractability, this thesis makes the following
+scope choices:
+
+\begin{itemize}
+  \item The control problem is formulated at the level of an individual tower
+  site; empirical evaluation is conducted across all ten ITU/Zindi sites to
+  assess performance across heterogeneous site profiles.
+  \item Control decisions are taken at \textbf{hourly resolution}
+  ($\Delta t = 1$\,h), consistent with the temporal granularity of the
+  ITU/Zindi dataset.
+  \item Component sizes (PV, battery, DG rating, tank capacity) are assumed
+  given; the focus is on \emph{operational control}, not investment planning.
+  \item Battery operation is modelled using engineering constraints on
+  state of charge and energy balance; detailed electrochemical
+  degradation is outside the scope of this work.
+  \item The stochastic diesel-delivery process is the only synthetic stochastic
+process introduced into the principal experiments. Load, PV generation, and grid-availability inputs
+  are drawn directly from the ITU site traces, while component parameters
+  and operational constraints are specified from the adopted engineering
+  assumptions.
+  \item Statistical comparisons use $n = 10$ independent seeds with paired
+  testing across identical site--scenario combinations (an increase from
+  an $n=3$ pilot evaluation conducted earlier in the project). This
+  improves statistical power considerably, but for some comparisons ---
+  particularly the inventory-observability ablation (H3) --- the
+  differences remain small and are not statistically distinguishable
+  under the final protocol; additional replication could clarify whether
+  a small effect exists.
+\end{itemize}
+
+Limitations arising from these choices include:
+
+\begin{itemize}
+  \item The proposed framework is trained under representative
+  delivery-delay regimes defined in the experimental protocol and
+  subsequently evaluated across four representative logistics scenarios.
+  Chapter~\ref{chap:methodology} describes the training protocol in
+  detail, while Chapter~\ref{chap:results} presents the corresponding
+  evaluation results. RLInv's advantage over classical ordering is
+  scenario-dependent rather than uniform, and narrows at very long delivery
+  lead times as physical tank capacity becomes the binding constraint for
+  every policy evaluated, not a training-distribution failure specific to
+  RLInv (Chapter~\ref{chap:results}).
+  \item Multi-site coordination and shared fuel logistics are not modelled.
+  \item Integrated forecasting modules for load or solar are not learned jointly
+  with the control policy.
+  \item The diesel generator is modelled at fixed rated power when ON; continuous
+  power setpoint control is left for future work.
+\end{itemize}
+
+These aspects are identified as promising directions for future work.
+
+% ============================================================
+% Code Availability — place just before "Thesis Roadmap and Relation
+% Between Chapters" in chap-introduction.tex, as its own short section.
+% ============================================================
+
+\section{Code Availability}
+\label{sec:code_availability}
+
+To support reproducibility, the complete implementation developed for
+this research --- including the simulation environment, training
+scripts, evaluation framework, baseline implementations, and analysis
+utilities --- is publicly available~\cite{rlinv_code_repo}. Trained
+model checkpoints and proprietary dataset artefacts are not included in
+the public repository because of their size and distribution
+constraints; however, the complete implementation required to reproduce
+the experimental workflow is provided.
+
+% ============================================================
+\section{Thesis Roadmap and Organisation}
+% ============================================================
+
+The thesis progresses from motivation and research-gap identification,
+through formal problem formulation and methodological development, to
+empirical evaluation and conclusions. Its principal contribution lies
+in connecting three elements that are often treated separately in the
+literature: telecom tower hybrid-energy dispatch, diesel inventory and
+replenishment uncertainty, and constrained reinforcement learning for
+joint operational control.
+
+This connection is established in Chapter~3 through the CMDP
+formulation, realised in Chapter~4 through the proposed method, and
+evaluated in Chapter~7 through the results, ablations, and robustness
+analyses. The remaining chapters provide the literature foundation,
+data analysis, experimental execution, and concluding discussion that
+support this technical workflow. Figure~\ref{fig:thesis-roadmap}
+summarises the organisation of the thesis and the principal
+cross-chapter dependencies.
+
+\begin{figure}[!htbp]
+\centering
+\resizebox{0.78\textwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=0.24cm,
+    every node/.style={
+        font=\footnotesize,
+        align=center
+    },
+    box/.style={
+        draw,
+        rounded corners,
+        rectangle,
+        minimum width=3.25cm,
+        minimum height=0.78cm,
+        inner sep=3pt
+    },
+    novel/.style={
+        draw,
+        rounded corners,
+        rectangle,
+        minimum width=3.25cm,
+        minimum height=0.78cm,
+        inner sep=3pt,
+        fill=gray!15,
+        thick
+    },
+    arrow/.style={->, thick},
+    xarrow/.style={->, thick, dashed}
+]
+
+\node[box] (c1)
+    {Chapter 1\\Motivation, scope, and objectives};
+
+\node[box, below=of c1] (c2)
+    {Chapter 2\\Literature review and research gap};
+
+\node[novel, below=of c2] (c3)
+    {\textbf{Chapter 3}\\CMDP: joint dispatch + inventory formulation};
+
+\node[novel, below=of c3] (c4)
+    {\textbf{Chapter 4}\\TelecomEnv, RLInv, and MaskablePPO};
+
+\node[box, below=of c4] (c5)
+    {Chapter 5\\Dataset, EDA, and site difficulty classification};
+
+\node[box, below=of c5] (c6)
+    {Chapter 6\\Experimental execution and training};
+
+\node[novel, below=of c6] (c7)
+    {\textbf{Chapter 7}\\Results, ablations, and robustness};
+
+\node[box, below=of c7] (c8)
+    {Chapter 8\\Conclusions, limitations, and future work};
+
+\draw[arrow] (c1) -- (c2);
+\draw[arrow] (c2) -- (c3);
+\draw[arrow] (c3) -- (c4);
+\draw[arrow] (c4) -- (c5);
+\draw[arrow] (c5) -- (c6);
+\draw[arrow] (c6) -- (c7);
+\draw[arrow] (c7) -- (c8);
+
+\draw[xarrow]
+    (c3.east)
+    to[out=0, in=0, looseness=1.25]
+    node[right, font=\scriptsize]
+    {CMDP defines\\eval metrics}
+    (c7.east);
+
+\draw[xarrow]
+    (c5.east)
+    to[out=0, in=0, looseness=0.8]
+    node[right, font=\scriptsize]
+    {ITU data grounds\\the evaluation}
+    (c7.east);
+
+\end{tikzpicture}%
+}
+\caption{Thesis roadmap. Shaded boxes identify the formulation, proposed
+method, and empirical evaluation that form the principal technical
+contribution. Dashed arrows indicate important cross-chapter
+dependencies, while the vertical sequence shows the reading order.}
+\label{fig:thesis-roadmap}
+\end{figure}
+
+\FloatBarrier
+
+
+\clearpage

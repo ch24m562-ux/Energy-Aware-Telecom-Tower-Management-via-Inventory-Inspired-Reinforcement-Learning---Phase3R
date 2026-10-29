@@ -1,0 +1,327 @@
+\chapter{Experimental Execution and Implementation}
+\label{chap:experimental-execution}
+\setlength{\emergencystretch}{1.5em}
+
+Chapter~\ref{chap:methodology} defined the experimental design: the
+simulator architecture, policy set, and evaluation protocol. This
+chapter records how that design was executed: the implementation
+sequence, the training workload actually run, how the ablation set
+evolved during development, and the statistical framework used for the
+confirmatory evaluation. The exploratory experiments described here
+informed the final experimental design but are not included in the
+confirmatory hypothesis-testing results reported in
+Chapter~\ref{chap:results}.
+% ============================================================
+\section{Implementation Sequence}
+\label{sec:impl_overview}
+% ============================================================
+
+The implementation was built in layers, each producing runnable,
+testable output before the next began, so that no layer depended on
+untested components from a lower one (Figure~\ref{fig:exec_pipeline},
+Table~\ref{tab:impl_sequence}).
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=0.5cm and 1.3cm,
+  box/.style={draw, rounded corners, align=center,
+              minimum width=2.6cm, minimum height=0.8cm, font=\footnotesize}
+]
+\node[box] (data)     {Data pipeline};
+\node[box, right=of data]     (sim)   {Simulator};
+\node[box, right=of sim]      (base)  {Baselines};
+\node[box, right=of base]     (rl)    {RL agent};
+\node[box, below=1.0cm of data] (trackb) {TrackB};
+\node[box, right=of trackb]   (abl)   {Ablations};
+\node[box, right=of abl]      (opt)   {Optimisation baselines};
+\node[box, right=of opt]      (eval)  {Full evaluation (44{,}000 rollouts)};
+
+\draw[->] (data) -- (sim);
+\draw[->] (sim)  -- (base);
+\draw[->] (base) -- (rl);
+\draw[->] (rl.south) -- ++(0,-0.3) -| (trackb.north);
+\draw[->] (trackb) -- (abl);
+\draw[->] (abl)  -- (opt);
+\draw[->] (opt)  -- (eval);
+\end{tikzpicture}%
+}
+\caption{Experiment execution pipeline, following the layer order of
+Table~\ref{tab:impl_sequence}.}
+\label{fig:exec_pipeline}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\small
+\caption{Implementation execution sequence.}
+\label{tab:impl_sequence}
+\begin{tabular}{cp{2.6cm}p{8.2cm}}
+\toprule
+\textbf{Layer} & \textbf{Component} & \textbf{Deliverable} \\
+\midrule
+1 & Data pipeline   & ITU/Zindi site CSVs loaded, validated, split \\
+2 & Simulator       & \texttt{TelecomEnv} passing unit tests on all transitions \\
+3 & Baselines       & B0, B1 rule-based policies producing first cost numbers \\
+4 & RL agent        & RLInv training on a single site, converging \\
+5 & TrackB          & Decomposed $(s,S)$ + PPO dispatch training \\
+6 & Ablations       & A5, A6, A7 variants trained and evaluated \\
+7 & Optimisation baselines & MPC and Oracle-MPC MILP dispatch (HiGHS solver) \\
+8 & Full evaluation & 44{,}000-rollout campaign complete (36{,}000 core $+$
+                        8{,}000 exploratory) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The repository structure follows this layer ordering
+(\texttt{env/}, \texttt{baselines/}, \texttt{train/}, \texttt{eval/}),
+with all hyperparameters centralised in a single
+\texttt{config/hparams.yaml} and no magic numbers in training scripts.
+
+Several implementation decisions made during this build are documented
+in Chapter~\ref{chap:methodology}'s Implementation Deviations table
+rather than repeated here, to avoid duplicating that content; this
+chapter records only decisions specific to \emph{how} the build was
+carried out, not \emph{what} was built.
+
+\begin{sloppypar}
+\paragraph{Parallel environment count.} The training configuration
+targeted eight parallel \texttt{SubprocVecEnv} workers. On the
+development machine, an OS limit on process handles caused intermittent
+failures at eight workers, so the count was reduced to four for all
+training runs. This roughly doubles wall-clock time per run but does not
+affect the PPO gradient estimate's statistical properties, since the
+effective batch size is preserved by scaling $n_{\text{steps}}$
+proportionally.
+\end{sloppypar}
+
+\paragraph{Observation normalisation synchronisation.} An early
+implementation issue caused anomalously high variance across seeds
+during evaluation, traced to \texttt{VecNormalize} statistics not being
+frozen and synchronised between training and evaluation environments. A
+custom evaluation callback was added to copy the training
+\texttt{VecNormalize} state to the evaluation environment before each
+validation pass; the anomalous variance disappeared once this was
+corrected.
+
+
+% ============================================================
+\section{Training Workload}
+\label{sec:training_execution}
+% ============================================================
+
+Table~\ref{tab:training_workload} summarises the training workload
+actually executed for the final Phase 3 campaign.
+
+\begin{table}[htb]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\caption{Total training workload, final campaign.}
+\label{tab:training_workload}
+\begin{tabular}{lrp{5.8cm}}
+\toprule
+\textbf{Item} & \textbf{Count} & \textbf{Note} \\
+\midrule
+Sites                    & 10  & All ITU/Zindi sites \\
+Seeds per policy         & 10  & 42, 123, 777, 7, 13, 21, 99, 314, 500, 999 \\
+RL policies trained      & 5   & RLInv, TrackB, A5, A6, A7 (standard PPO,
+                                 no masking) \\
+Non-RL policies          & 4   & B0, B1 (rule-based); MPC, Oracle-MPC
+                                 (optimisation-based) --- no training \\
+Timesteps per RL run     & 400{,}000 & Per site per seed \\
+Total RL training runs   & 500 & 5 trained policies $\times$ 10 sites
+                                 $\times$ 10 seeds \\
+Training budget          & Fixed & 400{,}000 steps, used consistently across all runs \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Training Convergence Assessment}
+
+A convergence check on three representative sites (1, 5, and 7) found no
+consistent benefit from extending training beyond 400{,}000 steps.
+The 400{,}000-step checkpoint was retained for all sites and seeds on
+this basis.
+
+To complement this checkpoint comparison,
+Figure~\ref{fig:training_curves} illustrates the evolution of the mean
+episode reward during training for three representative sites. The
+reward improves rapidly during the early stages of learning and reaches
+a broadly stable region before the selected 400{,}000-step training
+budget.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig_training_curves}
+\caption{Training convergence supporting the selected training budget.
+Mean rollout episode reward during RLInv training under the Normal
+training scenario for three representative sites (site2, site5 and
+site7), using seed 999. Reward improves rapidly during the early stages
+of training and reaches a broadly stable region before the selected
+400{,}000-step training budget. The inset highlights the convergence
+behaviour during the later stages of training. This figure illustrates
+training convergence and is not intended to compare policy performance
+across sites.}
+\label{fig:training_curves}
+\end{figure}
+
+The convergence behaviour shown in
+Figure~\ref{fig:training_curves}, together with the extended checkpoint
+analysis, provides additional evidence that the common
+400{,}000-step training budget is sufficient for the main experimental
+campaign.
+% ============================================================
+\section{Ablation Set Evolution}
+\label{sec:ablation_evolution}
+% ============================================================
+
+The original experimental plan specified eight ablations labelled
+A1--A8. The executed set differs from this plan
+(Table~\ref{tab:ablation_evolution}); every change is recorded here for
+transparency, along with the two optimisation-based baselines (MPC,
+Oracle-MPC) added later in Phase 3.
+
+\begin{table}[htb]
+\centering
+\small
+\caption{Evolution from the planned ablation set (A1--A8) to the
+executed set.}
+\label{tab:ablation_evolution}
+\begin{tabular}{p{2.7cm}p{1.6cm}p{6.6cm}}
+\toprule
+\textbf{Original label} & \textbf{Final label} & \textbf{Decision and reason} \\
+\midrule
+A1 (Full SC-PPO)  & RLInv   & Renamed to reflect actual implementation
+                               (MaskablePPO flat MLP, not modular SC-PPO) \\
+A8 (originally labelled ``Hierarchical'') & TrackB  & Renamed; calibrated $(s,S)$ + PPO dispatch \\
+A5, A7            & A5, A7  & Retained unchanged in design; evaluation
+                               scope expanded from an earlier 2-site
+                               targeted rerun to the full 10-site grid
+                               used by every other policy in the final
+                               Phase 3 campaign \\
+B0, B1            & B0, B1  & Added; not in the original A1--A8 plan, but
+                               essential rule-based anchors \\
+\midrule
+A2 (No masking alone) & Dropped & A7 already tests the no-masking
+                                  condition; redundant given
+                                  MaskablePPO's design \\
+A3 (No Lagrangian)    & Dropped & No Lagrangian update was implemented
+                                  (masking alone drove violations to
+                                  zero); not executable \\
+A4 (No recovery)      & Dropped & No recovery policy was implemented;
+                                  not executable \\
+A6 (Fixed ordering)   & Added & Not in the original plan; introduced
+                                 after the TrackB comparison was found
+                                 to confound ordering mechanism and
+                                 dispatch architecture, providing a
+                                 cleaner H1 test \\
+MPC, Oracle-MPC       & Added (Phase 3) & Not in the original plan;
+                                          added to distinguish whether
+                                          RLInv's advantage reflects
+                                          superior ordering or merely
+                                          superior dispatch, against an
+                                          optimisation-based reference
+                                          rather than only a
+                                          reinforcement-learning one \\
+\midrule
+\textbf{Final set} & \multicolumn{2}{l}{B0, B1, MPC, Oracle-MPC, A5, A6, A7, TrackB, RLInv} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two further policies (\texttt{mpc\_forecast}, a variant using a learned
+24-hour forecasting module, and \texttt{multi}, trained across a pool of
+scenarios rather than one at a time) were also implemented and
+evaluated during Phase 3 but are not part of the primary comparison, as
+neither altered the qualitative conclusions drawn from the nine-policy
+core set; they are excluded from Chapter~\ref{chap:results} for this
+reason.
+
+
+% ============================================================
+\section{Evaluation Execution}
+\label{sec:eval_execution}
+% ============================================================
+
+The final evaluation campaign comprises:
+\[
+9 \text{ policies} \times 10 \text{ sites} \times 10 \text{ seeds}
+\times 4 \text{ scenarios} \times 10 \text{ episodes} =
+36{,}000 \text{ core rollouts},
+\]
+plus a further 8{,}000 rollouts for the two exploratory policies noted
+above, for 44{,}000 rollouts in total. This is a full factorial design:
+every one of the nine core policies is evaluated under every scenario at
+every site, rather than scenario coverage being policy-specific.
+
+\subsection{Initial inventory randomisation}
+
+Training episodes randomise initial inventory over
+$[0.20,\,0.90]\,C^{\Tank}$, so that the policy learns to manage from any
+starting level rather than a single fixed condition. Evaluation episodes
+randomise initial inventory over the narrower range
+$[0.3,\,0.9]\,C^{\Tank}$, testing the policy across a realistic range of
+deployment starting conditions.
+
+
+% ============================================================
+\section{Statistical Framework}
+\label{sec:metrics}
+% ============================================================
+
+Table~\ref{tab:metrics} defines the operational metrics computed from
+each evaluation episode; EENS is the primary metric throughout
+Chapter~\ref{chap:results}, since it directly measures the consequence
+of policy failure and is sensitive to both dispatch and inventory
+decisions. The remaining metrics distinguish policies that achieve
+similar EENS through different mechanisms.
+
+\begin{table}[htb]
+\centering
+\small
+\caption{Evaluation metrics and their operational interpretation.}
+\label{tab:metrics}
+\begin{tabular}{lp{4.0cm}p{5.0cm}}
+\toprule
+\textbf{Metric} & \textbf{Definition} & \textbf{Interpretation} \\
+\midrule
+EENS (kWh)      & Expected Energy Not Served per episode: $\sum_t U_t$
+                & Primary reliability metric \\[4pt]
+Diesel consumption (kWh) & Total DG energy dispatched per episode
+                & Proxy for fuel cost and carbon emissions \\[4pt]
+Stockout events & Hours with $\Inv_t = 0$ and $G_t = 0$
+                & Hard reliability failures \\[4pt]
+Mean inventory (\%) & Mean $\Inv_t / C^{\Tank}$ per episode
+                & Characterises ordering behaviour \\[4pt]
+Orders placed   & Count of accepted (post-mask, post-clip) non-zero
+                  order actions per episode
+                & Characterises ordering frequency \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The statistical unit of analysis is the seed-level mean: for each
+policy, site, and scenario, the 10 episode values within a seed are
+averaged to produce one observation per seed. Using the episode-level
+mean as the unit would be incorrect, since the 10 episodes within a seed
+share the same trained weights and are not independent observations of
+a random policy; the seed-level mean correctly treats each independently
+trained policy instance as one observation.
+
+Treating training seeds rather than evaluation episodes as the
+statistical unit avoids pseudo-replication arising from repeated
+rollouts of the same trained policy.
+
+Hypothesis comparisons (H1, H2, H3, Chapter~\ref{chap:results}) are
+assessed with a paired $t$-test on within-seed differences, since every
+policy is evaluated on the same 10 seeds at the same 10 sites under the
+same 4 scenarios --- seed 42 under RLInv is matched against seed 42
+under the comparator, not treated as an independent sample. Effect size
+is reported as Cohen's $d_z$ (mean paired difference divided by the
+standard deviation of the paired differences). This paired design
+provides greater statistical power than an independent-samples test by
+removing between-instance variability common to both policies being
+compared, replacing the earlier pilot analysis based on three training
+seeds.
