@@ -393,11 +393,15 @@ not the number of ordering actions attempted) decreased monotonically
 from 2.16 orders per episode under Normal logistics to 1.34 under
 Extreme disruption. This is consistent with the policy reducing new
 orders when delivery completion within the remaining evaluation
-horizon becomes increasingly unlikely; diesel generator use is
-curtailed selectively
-rather than run to exhaustion, and stockout events remain at zero even
-under extreme stress despite non-zero EENS --- non-zero EENS occurs
-without recorded diesel stockout or hard constraint violation.
+horizon becomes increasingly unlikely; 
+diesel generator use is
+curtailed selectively rather than run to exhaustion.
+
+\revised{Across the 44,000 archived evaluation episodes, no
+stockout events or physical-clipping violations were recorded,
+although unmet load occurred. The corresponding stockout and
+violation penalties were therefore inactive during evaluation.}
+
 
 These behavioural observations provide an explanatory interpretation of
 the quantitative differences identified in the preceding hypothesis

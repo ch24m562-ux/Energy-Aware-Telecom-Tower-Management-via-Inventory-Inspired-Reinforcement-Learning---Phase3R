@@ -268,12 +268,15 @@ a decision variable. All continuous features are normalised online using
 \subsection{Action space, battery rule, and inventory}
 
 Diesel inventory is tracked in kWh-equivalent units. Tank capacity is
-$C^{\Tank} = 72\,\bar{D}$ (approximately three days of full-load backup,
-where $\bar{D}$ is the site mean hourly load). A generator start is
-permitted only if
+$C^{\Tank} = 72\,\bar{D}$, \revised{where $\bar{D}$ is the mean
+hourly load of the data segment supplied to the simulator.
+The same mean load is used for reward normalisation, with both
+quantities calculated separately for training and evaluation.}
+
+A generator start is permitted only if
 $\Inv_t \geq 1.20 \times P_{\mathrm{rated}}^{\DG} \times 2\,\mathrm{h}$,
-ensuring sufficient fuel for at least two hours of operation with a 20\%
-safety margin.
+\revised{providing a startup fuel reserve equivalent to two hours
+of rated generator output with a 20\% safety margin.}
 
 The action space is discrete with six elements encoding
 $\DG_t \in \{0,1\}$ and $Q_t \in \{0,\;0.30\,C^{\Tank},\;0.60\,C^{\Tank}\}$
@@ -295,6 +298,10 @@ energy-priority rule inside the simulator:
 \text{PV} \;\to\; \text{Grid} \;\to\; \text{Battery discharge}
 \;\to\; \text{DG} \;\to\; \text{Unmet load.}
 \]
+
+\revised{The battery update uses charge and discharge
+coefficients of 0.35 and 1.20, respectively, as provided
+in the site data (Eq.~\eqref{eq:soc}).}
 
 Diesel delivery delay is modelled as a geometric process: once an order is
 placed, delivery occurs at each subsequent step with a fixed per-step
@@ -344,8 +351,7 @@ rules are checked before the policy samples an action.
 
 \begin{enumerate}
   \item \textbf{DG masking:} all actions with $\DG_t = 1$ are disabled if
-  inventory is below the minimum startup threshold, preventing forced
-  mid-run shutdowns.
+inventory is below the \revised{minimum startup fuel threshold}.
   \item \textbf{Order masking:} all non-zero order actions are disabled if
   a delivery is already pending, enforcing the single-outstanding-order
   constraint. Order quantities exceeding remaining tank headroom are also
@@ -356,10 +362,9 @@ rules are checked before the policy samples an action.
 $-\infty$ before the softmax; the no-operation action is always feasible
 as a safe fallback. Post-step physical clipping (SoC and inventory to
 their bounds) provides a numerical backstop and contributes a small
-penalty term to the reward (Section~\ref{sec:reward_design}). No adaptive
-Lagrangian update was implemented. No hard violations were observed for
-the masked policies (verified in Chapter~\ref{chap:results}); the
-ablation results there are consistent with an architecture-dependent
+penalty term to the reward (Section~\ref{sec:reward_design}). No adaptive Lagrangian update was implemented.
+\revised{The ablation results in Chapter~\ref{chap:results}}
+are consistent with an architecture-dependent
 benefit from masking under stressed logistics when replenishment is
 externally managed, rather than masking acting primarily to eliminate
 constraint violations. The A6--TrackB comparison also differs in
@@ -506,10 +511,10 @@ $\lambda$, reflecting that a stockout coinciding with unmet load is a
 qualitatively different failure mode from unmet load alone (a hard
 reliability failure, not merely a cost), and should be penalised more
 severely rather than merely proportionally.
-\item \textbf{$\beta = 0.4$} (grid-cost weight) reflects that grid
-electricity is cheaper than diesel per unit energy in typical Indian
-tariff structures, but is not free; an intermediate weight between zero
-and $\alpha$ avoids the policy treating grid draw as costless.
+\item \textbf{$\beta = 0.4$} (grid-energy weight)
+\revised{assigns a lower reward penalty to grid consumption
+than to diesel generation. Grid allocation follows the
+simulator's fixed energy-priority rule.}
 \item \textbf{$\mu = 20$} (physical-violation penalty) is deliberately
 small: it is a numerical backstop for the rare event that hard masking
 still allows a boundary violation (e.g.\ through clipping), not a primary
@@ -598,11 +603,11 @@ upper clipping limits:
 $s_{\mathrm{norm}} = \mathrm{clip}(k_s \cdot \bar{D} \cdot \mathbb{E}[L]
 \,/\, C^{\Tank},\, 0.05,\,0.95)$ with safety multiplier $k_s=1$, and
 order-up-to level $S_{\mathrm{norm}} = \mathrm{clip}(0.85,\,
-s_{\mathrm{norm}}+0.10,\,0.95)$. This calibration is shared by B1,
-TrackB, A6, MPC, and Oracle-MPC.
+s_{\mathrm{norm}}+0.10,\,0.95)$. \revised{This calibration is used by TrackB and A6; B1, MPC,
+and Oracle-MPC use fixed thresholds of $s=0.25$ and $S=0.85$.}
 \end{quote}
 
-\textbf{MPC} pairs the same $(s,S)$ ordering rule with a model-predictive
+\textbf{MPC} pairs the \revised{default} $(s,S)$ ordering rule with a model-predictive
 dispatch controller: a receding-horizon MILP (solved via HiGHS,
 \texttt{scipy.optimize.milp}) re-optimised at every step over a
 24-hour planning horizon, using a persistence forecast (the current
@@ -627,7 +632,7 @@ MPC baseline.
 grid-availability traces over the remaining evaluation horizon (perfect
 information) rather than a persistence estimate, and its planning
 horizon extends to the full 360-step evaluation episode rather than 24
-hours. Diesel ordering remains governed by the same $(s,S)$ rule, and
+hours. Diesel ordering remains governed by the \revised{default} $(s,S)$ rule, and
 delivery timing remains stochastic. It is not a
 deployable policy; it exists to answer a specific diagnostic question: if
 the gap between RLInv and TrackB/MPC were explained purely by better
@@ -640,12 +645,10 @@ quality (Chapter~\ref{chap:results}).
 
 \textbf{B0} is a rule-based heuristic: a fixed-threshold inventory
 policy using uncalibrated inventory thresholds, paired with threshold
-dispatch, requiring no training. \textbf{B1} replaces B0's fixed
-thresholds with the same site-calibrated $(s,S)$ inventory policy used
-by TrackB, MPC, and Oracle-MPC; B0 and B1 share the same dispatch
-heuristic, differing only in the ordering rule. Concisely: B0 uses fixed
-inventory thresholds, B1 uses a site-calibrated $(s,S)$ inventory
-policy --- isolating the value of calibrated ordering specifically.
+dispatch, requiring no training. \revised{\textbf{B1} uses fixed $(s,S)$ ordering thresholds
+($s=0.25$, $S=0.85$) and follows a generator-dispatch rule
+similar to B0, with a default SoC threshold of 0.25
+compared with 0.15 in B0.}
 
 \textbf{A7} is vanilla PPO trained without action masking, isolating the
 contribution of the masking safety mechanism.
@@ -666,8 +669,7 @@ rather than a perfectly controlled isolation of the ordering decision
 alone. In
 this variant the RL agent controls only generator commitment under a
 reduced \texttt{Discrete(2)} action space, while diesel ordering is
-handled by the same calibrated $(s,S)$ rule used in TrackB, MPC, and
-Oracle-MPC. The observation space, reward function, and environment
+handled by the same calibrated $(s,S)$ rule used in \revised{TrackB}. The observation space, reward function, and environment
 dynamics remain identical to RLInv. Because the dispatch policy is
 re-learned under the smaller action space, A6 provides a cleaner ordering
 ablation than TrackB, which confounds ordering mechanism and dispatch
@@ -677,9 +679,8 @@ Chapter~\ref{chap:results} for this reason.
 \begin{table}[htb]
 \centering
 \small
-\caption{Policies evaluated in the experimental campaign, the question
-each answers, and the classical $(s,S)$ ordering rule shared across four
-of the six comparators.}
+\caption{Policies evaluated in the experimental campaign,
+their control mechanisms, and the question each addresses.}
 \label{tab:ablation-design}
 \begin{tabularx}{\textwidth}{
     >{\raggedright\arraybackslash}p{1.4cm}
@@ -704,7 +705,7 @@ B1 &
 $(s,S)$ rule &
 Threshold rule &
 --- &
-Value of intelligent ordering \\
+\revised{Classical $(s,S)$ baseline} \\
 MPC &
 $(s,S)$ rule &
 MILP, $H{=}24$ &
@@ -815,6 +816,10 @@ Statistical unit     & Seed-level mean, paired across policies \\
 \end{tabular}
 \end{table}
 
+\revised{The evaluation archive also contains results for
+two additional variants, \texttt{multi} and
+\texttt{mpc\_forecast}.}
+
 Statistical comparisons use the seed-level mean as the unit of analysis
 ($n=10$ seeds per condition, or $n=100$ when pooling across all 10 sites
 $\times$ 10 seeds for the primary comparison). Hypothesis comparisons
@@ -841,7 +846,7 @@ hypothesis tests, behavioural analysis, and all robustness checks
 (reward weighting, discount factor, tank capacity, delivery-distribution
 form, stochastic grid outages, and the RLInv-DA exploratory extension),
 are reported in Chapter~\ref{chap:results}. All reported
-experiments used ten evaluation episodes per training seed. Within each
+experiments used ten evaluation episodes per seed. Within each
 evaluation episode, stochastic delivery delays were independently
 sampled according to the selected lead-time distribution while
 maintaining the same underlying outage and demand profiles; different
@@ -897,10 +902,25 @@ Reward
 Safety mechanisms
   & Masking $+$ recovery $+$ Lagrangian
   & Masking $+$ physical clipping only \\[4pt]
+\revised{Battery coefficients}
+  & Conventional charge/discharge efficiency interpretation
+  & \revised{Site-data coefficients 0.35 and 1.20;
+    implemented discharge uses division by 1.20,
+    differing from the source scoring convention} \\[4pt]
+\revised{DG minimum ON-time}
+  & Two-hour minimum continuous ON-time
+  & \revised{Fuel-start reserve equivalent to 2.4 rated
+    output hours; no enforced ON-time latch} \\[4pt]
+\revised{Tank and reward scaling}
+  & Fixed tank parameter and mean-load reference
+  & \revised{$C^{\Tank}=72\bar{D}$ and reward
+    denominator $\bar{D}$ recomputed from each
+    supplied data slice} \\[4pt]
 Neural architecture
   & Modular domain-specific encoders
-  & \revised{Separate actor and critic MLPs, each with
-    $[256,\,256]$ hidden layers and Tanh activations} \\[4pt]
+  & \revised{Separate actor and critic MLPs with
+    $[256,\,256]$ hidden layers and Tanh activations;
+    the YAML ReLU entry is not consumed} \\[4pt]
 Training budget
   & 576{,}000 steps (script default)
   & 400{,}000 steps (final run); convergence check extended training to

@@ -155,10 +155,12 @@ $P_{\mathrm{rated}}^{\DG}$ when switched on, and a finite diesel tank
 replenished by external truck deliveries subject to stochastic lead times.
 $G_t \in \{0,1\}$ is a binary grid availability indicator; when $G_t = 0$ the
 grid is unavailable due to outage and no power can be drawn from it.
-Decisions are taken every hour ($\Delta t = 1$\,h). The key modelling
-assumptions are: perfect state observability within each timestep;
-non-cancellable diesel orders once placed; and a minimum DG up-time of 2\,h
-(2~steps at hourly resolution) whenever the generator is switched on.
+Decisions are taken every hour ($\Delta t = 1$\,h).
+The key formal modelling assumptions are:
+perfect state observability within each timestep;
+non-cancellable diesel orders once placed; and a minimum
+DG up-time of 2\,h (2~steps at hourly resolution) whenever
+the generator is switched on.
 The present study focuses on single-tower energy management using the
 ITU/Zindi dataset (10 sites, hourly resolution, 60 days each); multi-tower
 coordination, site-specific hardware variation, and long-horizon logistics
@@ -393,13 +395,15 @@ $-P_{\max}^{\dis} \leq P_t^{\Bat} \leq P_{\max}^{\ch}$. The feasible battery
 state transitions are obtained analytically from Equation~\eqref{eq:soc}
 and constrain the internal battery-dispatch rule at each step.
 
-The \emph{generator constraint} requires that the DG may only be switched on
-if sufficient fuel remains to sustain at least 2\,h of continuous operation
-at rated power, i.e.\ $\Inv_t \geq r_{\DG}\,P_{\mathrm{rated}}^{\DG}\cdot 2$.
+The \emph{generator constraint} \revised{in the formal model}
+requires that the DG may only be switched on
+if sufficient fuel remains to sustain at least 2\,h of operation
+at rated power, i.e.\
+$\Inv_t \geq r_{\DG}\,P_{\mathrm{rated}}^{\DG}\cdot 2$.
 If this condition is not met, $\DG_t = 1$ is infeasible in that state.
-Additionally, once the generator is switched on it must remain on for a
-minimum of 2\,h (2~steps), reflecting realistic start-up costs and equipment
-limitations.
+\revised{The formal model also specifies a minimum DG up-time of
+2\,h (2~steps). The implemented constraint is described in
+Chapter~\ref{chap:methodology}.}
 
 The \emph{ordering constraint} prevents a new diesel order from being placed
 while a delivery is already in transit ($\Pipe_t > 0$), making any $Q_t > 0$
