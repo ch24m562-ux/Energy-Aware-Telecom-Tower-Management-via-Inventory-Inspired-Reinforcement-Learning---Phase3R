@@ -110,9 +110,9 @@
 \dissertationDateOfBirth     {01 January 1998}
 \dissertationDegree          {Master of Technology in Industrial Artificial Intelligence}
 \dissertationTitle           {Energy-Aware Telecom Tower Management via Inventory-Inspired Reinforcement Learning}
-\dissertationMonth           {July}
+\dissertationMonth           {November}
 \dissertationYear            {2026}
-\dissertationCertificateDate {July 2026}
+\dissertationCertificateDate {November 2026}
 \dissertationType            {Thesis}
 \dissertationGuides          {Muthu Murugan Sethuraman}
 \dissertationCommitteeName   {Doctoral Committee}
@@ -120,6 +120,40 @@
 
 % Rupee macro to avoid Unicode ₹ issues
 \newcommand{\rupee}{\text{Rs.\,}}
+
+% ==============================================================================
+% PHASE 3R REVISION HIGHLIGHTING
+% ==============================================================================
+% MASTER SWITCH. \showrevisionstrue  -> highlighted resubmission PDF
+%                \showrevisionsfalse -> clean PDF, identical layout
+% Change this one line only; no other edit is needed to switch modes.
+\newif\ifshowrevisions
+\showrevisionstrue
+
+% Dark blue. Chosen so that it is clearly distinguishable on screen and
+% still prints as a mid-grey (approx. 45% K) on a greyscale printer.
+\definecolor{P3Rcolor}{rgb}{0.00,0.22,0.62}
+
+% Margin change bars: the greyscale-safe second channel, so the revisions
+% remain locatable even in a black-and-white print.
+\usepackage[color]{changebar}
+\setlength{\changebarwidth}{1.3pt}
+\setlength{\changebarsep}{7pt}
+\cbcolor{P3Rcolor}
+
+% \revised{...} -- INLINE. Safe in body text, table cells, captions,
+% headings and maths. Robust, so it survives moving into the .toc/.lof.
+\DeclareRobustCommand{\revised}[1]{%
+  \ifshowrevisions\textcolor{P3Rcolor}{#1}\else#1\fi}
+
+% revisedblock -- BLOCK. Colours the text and draws a margin change bar
+% that survives line and page breaks. Use for whole paragraphs and for
+% wholly new sections. Do NOT use inside a table, float or tcolorbox;
+% use \revised there instead.
+\newenvironment{revisedblock}%
+  {\ifshowrevisions\cbstart\color{P3Rcolor}\fi\ignorespaces}%
+  {\ifshowrevisions\cbend\fi}
+% ===========================================================
 
 % Glossary / abbreviations / notation setup
 \setupGlossaryAbbreviationsDefinitions

@@ -167,40 +167,50 @@ where non-myopic planning is most valuable.
 
 \subsection{Why a flat MLP rather than modular encoders?}
 
-With an 11-dimensional observation vector, a two-layer flat MLP
-$[256,\,256]$ provides sufficient representational capacity. Modular
-domain-specific encoders introduce additional architectural
-hyperparameters (encoder depth, output dimension, concatenation
-structure) whose benefits were not investigated in this work given the
-small observation dimensionality. The flat design simplifies
+
+\revised{With an 11-dimensional observation vector, separate actor and
+critic MLPs, each with two 256-unit hidden layers, provide sufficient
+representational capacity.} Modular domain-specific encoders introduce
+additional architectural hyperparameters (encoder depth, output dimension,
+concatenation structure) whose benefits were not investigated in this work
+given the small observation dimensionality. The flat design simplifies
 implementation and is directly supported by the Stable-Baselines3
 \texttt{MlpPolicy} without a custom feature extractor. The same network
 architecture and hidden-layer configuration were used for all PPO-based
 policies unless explicitly stated, ensuring that performance differences
 reflected the control formulation rather than network capacity.
-Table~\ref{tab:architecture} specifies the resulting network exactly.
+
+\revised{Table~\ref{tab:architecture} reports the implemented RLInv
+architecture, comprising separate actor and critic networks with
+Tanh activations and 139,527 trainable parameters in total.}
 
 \begin{table}[htb]
 \centering
 \small
 \caption{RLInv network architecture. Actor logits are masked
 (Section~\ref{sec:rationale}) before the softmax; the critic head is
-discarded at inference.}
+\revised{used during training but not for action selection at inference}.}
 \label{tab:architecture}
 \begin{tabular}{lll}
 \toprule
 \textbf{Layer} & \textbf{Shape} & \textbf{Parameters} \\
 \midrule
-Input (observation)      & 11                        & --- \\
-Hidden layer 1 + ReLU    & $11 \to 256$              & 3{,}072 \\
-Hidden layer 2 + ReLU    & $256 \to 256$             & 65{,}792 \\
-Actor head (masked)      & $256 \to 6$               & 1{,}542 \\
-Critic head              & $256 \to 1$               & 257 \\
+Input (observation) & 11 & --- \\
+\revised{Actor hidden layer 1 (Tanh)} & $11 \to 256$ & 3{,}072 \\
+\revised{Actor hidden layer 2 (Tanh)} & $256 \to 256$ & 65{,}792 \\
+Actor head (masked) & $256 \to 6$ & 1{,}542 \\
+\revised{\textbf{Actor subtotal}} & & \revised{\textbf{70{,}406}} \\
 \midrule
-\textbf{Total}           &                            & \textbf{70{,}663} \\
+\revised{Critic hidden layer 1 (Tanh)} & $11 \to 256$ & \revised{3{,}072} \\
+\revised{Critic hidden layer 2 (Tanh)} & $256 \to 256$ & \revised{65{,}792} \\
+\revised{Critic value head} & $256 \to 1$ & 257 \\
+\revised{\textbf{Critic subtotal}} & & \revised{\textbf{69{,}121}} \\
+\midrule
+\textbf{Total} & & \revised{\textbf{139{,}527}} \\
 \bottomrule
 \end{tabular}
 \end{table}
+
 
 
 % ============================================================
@@ -429,7 +439,9 @@ Table~\ref{tab:hyperparams} lists all training hyperparameters.
 \textbf{Parameter} & \textbf{Value} & \textbf{Rationale} \\
 \midrule
 Algorithm              & MaskablePPO (\texttt{sb3-contrib}) & Hard feasibility masking \\
-Policy network         & Flat MLP [256,\,256], ReLU         & CPU-feasible capacity \\
+Policy network
+  & \revised{Separate actor and critic MLPs $[256,\,256]$, Tanh}
+  & CPU-feasible capacity \\
 Total timesteps        & 400{,}000 per seed                 & Fixed training budget used consistently across all runs \\
 Learning rate          & $3\times10^{-4}$ (linear decay)    & PPO standard \\
 Clip ratio $\epsilon$  & 0.2                                & PPO standard \\
@@ -887,7 +899,8 @@ Safety mechanisms
   & Masking $+$ physical clipping only \\[4pt]
 Neural architecture
   & Modular domain-specific encoders
-  & Flat MLP $[256,\,256]$, ReLU \\[4pt]
+  & \revised{Separate actor and critic MLPs, each with
+    $[256,\,256]$ hidden layers and Tanh activations} \\[4pt]
 Training budget
   & 576{,}000 steps (script default)
   & 400{,}000 steps (final run); convergence check extended training to
