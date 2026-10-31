@@ -865,10 +865,8 @@ under identical experimental settings.
 Although the implementation follows the CMDP formulation of
 Chapter~\ref{chap:problem} closely, several practical simplifications
 were adopted to enable stable training within the available CPU budget.
-Table~\ref{tab:deviations} consolidates these points; each deviation was
-adopted for a specific practical reason and does not invalidate the
-empirical study, but defines the scope within which results should be
-interpreted.
+Table~\ref{tab:deviations} summarises the main differences
+between the formal CMDP and the implemented system.
 
 \begin{table}[htb]
 \centering
@@ -919,8 +917,7 @@ Safety mechanisms
 Neural architecture
   & Modular domain-specific encoders
   & \revised{Separate actor and critic MLPs with
-    $[256,\,256]$ hidden layers and Tanh activations;
-    the YAML ReLU entry is not consumed} \\[4pt]
+    $[256,\,256]$ hidden layers and Tanh activations} \\[4pt]
 Training budget
   & 576{,}000 steps (script default)
   & 400{,}000 steps (final run); convergence check extended training to

@@ -166,16 +166,32 @@ ITU/Zindi dataset (10 sites, hourly resolution, 60 days each); multi-tower
 coordination, site-specific hardware variation, and long-horizon logistics
 network optimisation are outside the scope of the current work.
 
-At each timestep, the power balance constraint must be satisfied:
+At each timestep, \revised{the power balance accounts for
+the energy supplied to the load and any unmet demand:}
 \begin{equation}
-P_t^{\Load} = P_t^{\PV} - P_t^{\Bat} + P_t^{\Grid} + \DG_t\,P_{\mathrm{rated}}^{\DG},
+P_t^{\Load} =
+\revised{
+P_t^{\PV,\mathrm{used}}
+- P_t^{\Bat}
++ P_t^{\Grid}
++ P_t^{\DG,\mathrm{used}}
++ \frac{U_t}{\Delta t}
+},
 \label{eq:balance}
 \end{equation}
-where $P_t^{\Grid} = G_t \cdot P_t^{\Grid,\max}$ is the grid power drawn, bounded
-by grid availability and the local connection capacity. The negative sign on
-$P_t^{\Bat}$ reflects the convention of Table~\ref{tab:notation}: a positive
-value denotes charging (power absorbed from the bus), so a discharging battery
-contributes positively to the supply side via the negative sign.
+\revised{where $P_t^{\PV,\mathrm{used}}$ denotes PV power
+used by the load or battery, $P_t^{\DG,\mathrm{used}}$
+denotes actual DG power supplied, and $U_t$ is unmet
+load energy (kWh). Grid draw satisfies
+$0 \leq P_t^{\Grid} \leq G_t P_t^{\Grid,\max}$,
+while DG supply is bounded by
+$0 \leq P_t^{\DG,\mathrm{used}}
+\leq \DG_t P_{\mathrm{rated}}^{\DG}$.}
+The negative sign on $P_t^{\Bat}$ reflects the convention
+of Table~\ref{tab:notation}: a positive value denotes
+charging (power absorbed from the bus), so a discharging
+battery contributes positively to the supply side via
+the negative sign.
 
 Although diesel inventory decisions operate on multi-day timescales, they
 directly constrain hourly dispatch feasibility. During grid outages or

@@ -27,13 +27,13 @@ definitions given in Chapter~\ref{chap:methodology}.
 
 Table~\ref{tab:primary_comparison} compares RLInv against four
 reference policies. Two are rule-based: a fixed-threshold inventory
-policy using uncalibrated thresholds (B0), and a classical $(s,S)$ inventory policy with
+policy using uncalibrated thresholds (B0), and an analytically calibrated $(s,S)$ inventory policy with
 rule-based dispatch (B1). One is optimisation-based: a rolling-horizon
 Model Predictive Control baseline (MPC) that addresses the standing
 question of whether classical optimisation is sufficient once its
 required forecasts are supplied. The fourth (TrackB) pairs the same classical
 $(s,S)$ ordering rule with a \emph{learned} (reinforcement-learning)
-dispatch policy, and is included to isolate a distinct question from
+dispatch policy, and is included to examine a distinct question from
 the other three: whether reinforcement learning \emph{alone}, applied
 only to dispatch, is sufficient, or whether the reliability gains
 reported below require learning ordering and dispatch \emph{jointly}.
@@ -170,7 +170,7 @@ learning, action masking, and inventory-aware state representation.
 \includegraphics[width=\textwidth]{fig_eens_comparison_v4.png}
 \caption{Overall policy performance across delivery scenarios. Policies,
 left to right: \textbf{B0} (threshold dispatch, fixed uncalibrated
-threshold ordering), \textbf{B1} (threshold dispatch, calibrated $(s,S)$
+threshold ordering), \textbf{B1} (threshold dispatch, ixed-threshold $(s,S)$
 ordering), \textbf{MPC} (model-predictive dispatch; planning horizon
 discussed in Chapter~\ref{chap:methodology}), \textbf{TrackB}
 ($(s,S)$ ordering with a separately learned dispatch policy),
@@ -431,8 +431,8 @@ to reward design, physical sizing, and delivery-time modelling.
 The four scenarios used throughout this chapter (Normal, Delayed,
 Monsoon, Extreme) are discrete operating points; this subsection
 instead asks how performance evolves across a wider sequence of mean
-delivery lead-time settings, increasing from 0h to 336h, aggregated over all 10
-sites and evaluation seeds (Figure~\ref{fig:lead_sensitivity}).
+delivery lead-time settings, increasing from 0h to 336h, \revised{evaluated across sites 2, 5, 7, and 10
+using the evaluation seeds} (Figure~\ref{fig:lead_sensitivity}).
 
 \begin{figure}[htb]
 \centering
