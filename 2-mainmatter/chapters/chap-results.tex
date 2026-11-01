@@ -67,7 +67,8 @@ TrackB ($(s,S)$ + learned dispatch) & 1.28 & 3.65 & 174.50 & 152.13 \\
 \end{tabular}
 \end{table}
 
-RLInv achieves the lowest EENS across all four scenarios. Under normal
+\revised{Among the six policies in Table~\ref{tab:primary_comparison},
+RLInv achieves the lowest EENS across all four scenarios.} Under normal
 logistics, most policies perform adequately, but the advantage of
 RLInv widens substantially as delivery uncertainty increases: relative
 to the strongest classical baseline (B1), RLInv reduces EENS by 73\%
@@ -731,6 +732,133 @@ a completed finding addressing the underlying reviewer feedback,
 rather than deferred as future work.
 
 \input{2-mainmatter/chapters/rlinv_da_design_rationale.tex}
+
+
+% ============================================================
+\section[Extended Controller Comparisons]
+{\revised{Extended Controller Comparisons}}
+% ============================================================
+
+\subsection[Calibrated Classical Baselines]
+{\revised{Calibrated Classical Baselines}}
+
+
+\begin{revisedblock}
+The classical $(s,S)$ controller was further evaluated
+using three alternative threshold configurations.
+B1-Analytic determines its reorder point from expected
+consumption over the assumed Normal supplier lead time
+of 24 hours. B1*-Deployable and B1*-HighBuffer instead
+use thresholds selected through offline calibration on
+days 1--45, under Normal logistics.
+
+The calibration evaluated 503 candidate configurations
+across ten sites, using 5,030 simulated episodes and
+initial inventory sampled uniformly over 20--90\% of
+tank capacity. B1*-Deployable prioritises low EENS,
+followed by diesel consumption and order frequency
+among near-best configurations. B1*-HighBuffer selects
+the highest reorder threshold among candidates attaining
+the minimum training EENS.
+
+The selected parameters are site-specific and remain
+fixed throughout held-out evaluation. None of the
+classical controllers updates its ordering thresholds
+from observed supplier delays during operation.
+\end{revisedblock}
+
+
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{\revised{Mean EENS (kWh per episode) for the
+classical ordering baselines and RLInv across ten sites.
+Lower values indicate better reliability.}}
+\label{tab:calibrated_baselines}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Controller} &
+\textbf{Normal} &
+\textbf{Delayed} &
+\textbf{Monsoon} &
+\textbf{Extreme} \\
+\midrule
+\revised{B1-Original} &
+\revised{3.5476} & \revised{13.4320} &
+\revised{23.2043} & \revised{57.7315} \\
+\revised{B1-Analytic} &
+\revised{1.6862} & \revised{12.4825} &
+\revised{23.1672} & \revised{61.9676} \\
+\revised{B1*-Deployable} &
+\revised{0.6744} & \revised{7.1170} &
+\revised{16.4545} & \revised{55.6580} \\
+\revised{B1*-HighBuffer} &
+\revised{0.0628} & \revised{3.3952} &
+\revised{11.2822} & \revised{53.1643} \\
+\midrule
+\revised{RLInv} &
+\revised{0.0189} & \revised{3.5992} &
+\revised{11.2865} & \revised{53.8544} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{\revised{Mean orders placed per 360-hour episode
+across ten sites, under the same evaluation conditions
+as Table~\ref{tab:calibrated_baselines}.}}
+\label{tab:calibrated_baseline_orders}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Controller} &
+\textbf{Normal} &
+\textbf{Delayed} &
+\textbf{Monsoon} &
+\textbf{Extreme} \\
+\midrule
+\revised{B1*-Deployable} &
+\revised{0.982} & \revised{0.938} &
+\revised{0.884} & \revised{0.637} \\
+\revised{B1*-HighBuffer} &
+\revised{1.998} & \revised{1.954} &
+\revised{1.829} & \revised{1.252} \\
+\revised{RLInv} &
+\revised{2.164} & \revised{2.106} &
+\revised{1.970} & \revised{1.341} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\begin{revisedblock}
+B1*-HighBuffer achieves substantially lower EENS than
+B1*-Deployable under Delayed and Monsoon logistics,
+but places more orders. Compared with RLInv, however,
+HighBuffer achieves similar aggregate reliability with
+slightly fewer orders across all four scenarios.
+
+The results are not uniform across sites. For example,
+under Extreme logistics on site5, HighBuffer records
+higher EENS than Deployable (243.652 versus
+241.348 kWh). The HighBuffer selection was motivated
+by the possibility of longer delivery delays, although
+its parameters were derived from Normal-scenario
+training results. A limited held-out pilot was also
+inspected before the complete evaluation.
+
+These findings demonstrate that classical threshold
+selection materially affects reliability and ordering
+behaviour. They do not establish universal superiority
+of either the calibrated classical controller or RLInv,
+nor do order counts alone represent total operating cost.
+\end{revisedblock}
+
+
 
 % ============================================================
 \section{Summary}
