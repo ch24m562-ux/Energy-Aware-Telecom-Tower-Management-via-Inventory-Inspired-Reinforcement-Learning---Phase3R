@@ -26,13 +26,15 @@ definitions given in Chapter~\ref{chap:methodology}.
 \emph{Does RLInv outperform existing approaches?}
 
 Table~\ref{tab:primary_comparison} compares RLInv against four
-reference policies. Two are rule-based: a fixed-threshold inventory
-policy using uncalibrated thresholds (B0), and an analytically calibrated $(s,S)$ inventory policy with
-rule-based dispatch (B1). One is optimisation-based: a rolling-horizon
+reference policies. Two are rule-based: B0 uses fixed, uncalibrated
+thresholds for dispatch and replenishment, whereas
+B1 uses fixed default $(s,S)$ ordering thresholds
+($s=0.25$, $S=0.85$) with rule-based dispatch. One is optimisation-based: a rolling-horizon
 Model Predictive Control baseline (MPC) that addresses the standing
 question of whether classical optimisation is sufficient once its
-required forecasts are supplied. The fourth (TrackB) pairs the same classical
-$(s,S)$ ordering rule with a \emph{learned} (reinforcement-learning)
+required forecasts are supplied. The fourth (TrackB) pairs an analytically
+parameterised $(s,S)$ ordering rule with a
+\emph{learned} (reinforcement-learning)
 dispatch policy, and is included to examine a distinct question from
 the other three: whether reinforcement learning \emph{alone}, applied
 only to dispatch, is sufficient, or whether the reliability gains
@@ -745,12 +747,14 @@ rather than deferred as future work.
 
 \begin{revisedblock}
 The classical $(s,S)$ controller was further evaluated
-using three alternative threshold configurations.
-B1-Analytic determines its reorder point from expected
-consumption over the assumed Normal supplier lead time
-of 24 hours. B1*-Deployable and B1*-HighBuffer instead
-use thresholds selected through offline calibration on
-days 1--45, under Normal logistics.
+using three alternative threshold configurations:
+B1-Analytic and two offline-calibrated variants,
+B1*-Deployable and B1*-HighBuffer (collectively
+denoted B1*). B1-Analytic determines its reorder
+point from expected consumption over the assumed
+Normal supplier lead time of 24 hours. The B1*
+thresholds were selected through offline calibration
+on days 1--45, under Normal logistics.
 
 The calibration evaluated 503 candidate configurations
 across ten sites, using 5,030 simulated episodes and
@@ -873,7 +877,10 @@ unmasked PPO (A7), Deep Q-Network (DQN), and
 Advantage Actor-Critic (A2C).
 
 The comparison used three representative sites:
-site1 (Easy), site3 (Medium), and site5 (Hard).
+site1 (Easy), site3 (Medium), and site5 (Hard),
+covering the operating-difficulty classes defined
+in Section~\ref{sec:site_classification}
+(Table~\ref{tab:difficulty}).
 Each controller was evaluated using five training seeds
 (42, 123, 777, 7, 21), four delivery scenarios,
 and ten evaluation episodes per seed and scenario.
@@ -947,9 +954,9 @@ evaluated controller configurations.
 \centering
 \small
 \caption{\revised{Order requests blocked by the simulator
-as a percentage of all evaluation steps in the G4
-comparison. Each controller was evaluated over
-216,000 hourly steps.}}
+as a percentage of all evaluation steps in the
+four-controller comparison. Each controller was
+evaluated over 216,000 hourly steps.}}
 \label{tab:g4_order_blocking}
 \begin{tabular}{lr}
 \toprule
