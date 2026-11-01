@@ -859,6 +859,132 @@ nor do order counts alone represent total operating cost.
 \end{revisedblock}
 
 
+% ============================================================
+\subsection[Comparison of Reinforcement Learning Algorithms]
+{\revised{Comparison of Reinforcement Learning Algorithms}}
+\label{sec:g4_rl_comparison}
+% ============================================================
+
+\begin{revisedblock}
+To examine whether the results depend on the choice of
+reinforcement learning algorithm, four controller
+configurations were compared: RLInv (MaskablePPO),
+unmasked PPO (A7), Deep Q-Network (DQN), and
+Advantage Actor-Critic (A2C).
+
+The comparison used three representative sites:
+site1 (Easy), site3 (Medium), and site5 (Hard).
+Each controller was evaluated using five training seeds
+(42, 123, 777, 7, 21), four delivery scenarios,
+and ten evaluation episodes per seed and scenario.
+This gives 2,400 evaluation episodes across the four
+controllers, with five independently trained models
+per site and algorithm.
+
+All controllers were evaluated on the same held-out
+days 46--60, with matched initial inventory conditions.
+The nominal training budget was 400,000 interactions.
+Actual interaction counts were 401,408 for RLInv and
+A7, 400,000 for DQN, and 400,384 for A2C.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{\revised{Mean EENS (kWh per 360-hour episode)
+on the constrained site5, averaged over five trained
+seeds and ten evaluation episodes per seed.
+Lower values indicate better reliability.}}
+\label{tab:g4_rl_site5}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Scenario} &
+\textbf{RLInv} &
+\textbf{A7} &
+\textbf{DQN} &
+\textbf{A2C} \\
+\midrule
+\revised{Normal} &
+\revised{0.000} & \revised{0.000} &
+\revised{0.000} & \revised{0.722} \\
+\revised{Delayed} &
+\revised{12.464} & \revised{15.911} &
+\revised{12.639} & \revised{16.452} \\
+\revised{Monsoon} &
+\revised{58.509} & \revised{61.653} &
+\revised{55.240} & \revised{60.819} \\
+\revised{Extreme} &
+\revised{257.897} & \revised{260.711} &
+\revised{255.662} & \revised{261.194} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+Under Normal logistics, RLInv, A7, and DQN record
+zero mean EENS on site5. Under Delayed conditions,
+RLInv and DQN have similar mean EENS. DQN records
+numerically lower EENS under Monsoon and Extreme
+conditions, but the paired five-seed confidence
+intervals for the DQN--RLInv differences include zero
+in all three stressed scenarios.
+
+The other sites provide less discrimination between
+algorithms. On site1, DQN and A2C record zero EENS
+across all evaluated episodes. Site3 shows only small
+differences, concentrated in a few evaluation cases.
+The Normal-scenario RLInv--DQN and A7--DQN comparisons
+are exact EENS ties across all 150 matched episodes
+in the three-site subset.
+
+These results do not establish a consistent reliability
+advantage for any one RL algorithm. They show that DQN
+can achieve reliability comparable to RLInv within the
+evaluated controller configurations.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{\revised{Order requests blocked by the simulator
+as a percentage of all evaluation steps in the G4
+comparison. Each controller was evaluated over
+216,000 hourly steps.}}
+\label{tab:g4_order_blocking}
+\begin{tabular}{lr}
+\toprule
+\textbf{Controller} &
+\textbf{Blocked order requests (\% of steps)} \\
+\midrule
+\revised{RLInv (masked)} & \revised{0.00} \\
+\revised{A7 (unmasked PPO)} & \revised{58.50} \\
+\revised{DQN (unmasked)} & \revised{55.90} \\
+\revised{A2C (unmasked)} & \revised{40.54} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+The controllers also differ in their ordering behaviour.
+The unmasked policies frequently request orders that
+the environment subsequently blocks, primarily because
+a delivery is already pending. RLInv avoids such
+requests through action masking before action selection.
+Its zero blocked-request rate therefore follows from
+the masking mechanism, rather than demonstrating
+that the policy learned feasibility independently.
+
+The comparison has two training-design differences.
+RLInv was trained with initial inventory sampled
+uniformly over 20--90\% of tank capacity, whereas
+A7, DQN, and A2C used a fixed initial fraction of
+60\%. The algorithms also used different optimisation
+and tuning configurations. Consequently, the results
+compare the implemented controller configurations
+rather than isolating the effect of algorithm choice
+alone.
+\end{revisedblock}
+
 
 % ============================================================
 \section{Summary}
