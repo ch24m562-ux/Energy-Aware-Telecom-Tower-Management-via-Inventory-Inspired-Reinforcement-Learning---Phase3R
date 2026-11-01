@@ -993,6 +993,25 @@ alone.
 \end{revisedblock}
 
 
+\begin{revisedblock}
+A supplementary training-budget analysis examined
+DQN and A2C at intermediate checkpoints of 50,000,
+100,000, and 200,000 interactions, alongside their
+final 400,000-interaction checkpoints. On the
+constrained site5, DQN approached its final observed
+EENS level by 100,000 interactions, whereas A2C
+exhibited non-monotonic performance. The exploratory
+paired confidence intervals did not establish
+significant EENS differences between intermediate
+and final checkpoints. These observations provide
+additional context for the selected training budget,
+but do not establish convergence or comparative
+learning efficiency across all four RL algorithms.
+The detailed results are presented in
+\hyperref[app:rl_training_budget]{Appendix~\ref*{app:rl_training_budget}}.
+\end{revisedblock}
+
+
 % ============================================================
 \section{Summary}
 \label{sec:results_summary}

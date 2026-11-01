@@ -1,0 +1,109 @@
+
+% ============================================================
+% Supplementary Training-Budget Analysis
+% ============================================================
+
+\begin{revisedblock}
+This appendix provides supplementary results on the
+sensitivity of DQN and A2C reliability to training
+budget. Intermediate model checkpoints corresponding
+to nominal budgets of 50,000, 100,000, and 200,000
+interactions were evaluated alongside the final
+400,000-interaction checkpoints.
+
+The evaluation used site1, site3, and site5, five
+independent training seeds, four supplier-delay
+scenarios, and ten evaluation episodes per seed and
+scenario. The intermediate-checkpoint analysis
+comprised 90 model evaluations and 3,600 held-out
+episodes. Each checkpoint was evaluated using its
+corresponding saved observation-normalisation
+statistics.
+
+Table~\ref{tab:appendix_rl_budget} reports the
+results for site5, where reliability differences
+were most evident. Mean EENS is calculated across
+five training seeds and four delivery scenarios.
+
+Differences are measured relative to the final
+checkpoint. The exploratory 95\% confidence
+intervals are based on paired training-seed results.
+\end{revisedblock}
+
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{\revised{Training-budget sensitivity for
+DQN and A2C on site5. Mean EENS and differences
+are in kWh per 360-hour episode. A positive
+difference indicates higher EENS than the final
+checkpoint.}}
+\label{tab:appendix_rl_budget}
+\begin{tabular}{llrrl}
+\toprule
+\textbf{Algorithm} &
+\textbf{Budget} &
+\textbf{Mean EENS} &
+\textbf{Difference} &
+\textbf{95\% CI} \\
+\midrule
+\revised{DQN} & \revised{50k} &
+\revised{84.8580} & \revised{+3.9729} &
+\revised{$[-3.2409,\ 11.1866]$} \\
+\revised{DQN} & \revised{100k} &
+\revised{81.0724} & \revised{+0.1872} &
+\revised{$[-1.0218,\ 1.3963]$} \\
+\revised{DQN} & \revised{200k} &
+\revised{80.9840} & \revised{+0.0988} &
+\revised{$[-0.9470,\ 1.1447]$} \\
+\revised{DQN} & \revised{400k} &
+\revised{80.8852} & \revised{--} &
+\revised{Reference} \\
+\midrule
+\revised{A2C} & \revised{50k} &
+\revised{83.7292} & \revised{-1.0674} &
+\revised{$[-2.6841,\ 0.5492]$} \\
+\revised{A2C} & \revised{100k} &
+\revised{84.3715} & \revised{-0.4252} &
+\revised{$[-2.3601,\ 1.5097]$} \\
+\revised{A2C} & \revised{200k} &
+\revised{84.0428} & \revised{-0.7539} &
+\revised{$[-2.4176,\ 0.9099]$} \\
+\revised{A2C} & \revised{400k} &
+\revised{84.7967} & \revised{--} &
+\revised{Reference} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+For DQN, mean EENS on site5 decreases from
+84.8580 kWh at 50,000 interactions to
+81.0724 kWh at 100,000, followed by smaller
+numerical improvements at subsequent checkpoints.
+A2C does not exhibit a consistent improvement
+with additional interactions.
+
+Across all three sites, four delivery scenarios,
+and three intermediate checkpoints, none of the
+72 exploratory paired 95\% confidence intervals
+for EENS differences relative to the final
+checkpoint excludes zero. Site1 records zero
+EENS for both algorithms at all checkpoints,
+while site3 provides limited additional
+discrimination.
+
+These results describe training-budget sensitivity
+rather than statistically established convergence.
+The final 400,000-interaction checkpoints were
+retained for the main algorithm comparison;
+intermediate checkpoints were not selected based
+on held-out evaluation performance.
+
+Equivalent intermediate-checkpoint evaluations
+were not available for the historical RLInv and A7
+models. Consequently, this supplementary analysis
+does not establish relative learning efficiency
+across all four RL algorithms.
+\end{revisedblock}
