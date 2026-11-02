@@ -69,11 +69,15 @@ TrackB ($(s,S)$ + learned dispatch) & 1.28 & 3.65 & 174.50 & 152.13 \\
 \end{tabular}
 \end{table}
 
-\revised{Among the six policies in Table~\ref{tab:primary_comparison},
-RLInv achieves the lowest EENS across all four scenarios.} Under normal
+\revised{Within the original-configuration policy set in
+Table~\ref{tab:primary_comparison}, RLInv records the lowest
+mean EENS under all four delivery-logistics scenarios.
+That table excludes the separately calibrated B1*
+variants in Subsection~\ref{sec:calibrated_baselines};
+B1*-HighBuffer records lower numerical mean EENS
+than RLInv in three stressed scenarios.} Under normal
 logistics, most policies perform adequately, but the advantage of
-RLInv widens substantially as delivery uncertainty increases: relative
-to the strongest classical baseline (B1), RLInv reduces EENS by 73\%
+RLInv widens substantially as delivery uncertainty increases: relative to the original fixed-threshold B1 baseline, RLInv reduces EENS by 73\%
 under delayed logistics, 51\% under monsoon conditions, and 7\% under
 extreme logistics stress. The narrowing margin under the most severe
 scenario is itself informative: under a mean 336-hour delivery lead
@@ -1143,270 +1147,7 @@ controllers in Subsection~\ref{sec:calibrated_baselines}.
 \end{revisedblock}
 
 
-\subsection[Comparison of Reinforcement Learning Algorithms]
-{\revised{Comparison of Reinforcement Learning Algorithms}}
-\label{sec:g4_rl_comparison}
 
-\begin{revisedblock}
-Across the ten-site evaluation, RLInv, unmasked PPO (A7),
-Deep Q-Network (DQN), and Advantage Actor--Critic (A2C)
-achieve broadly similar reliability. The most pronounced
-behavioural distinction is in how their ordering actions
-interact with the inventory-feasibility rules.
-
-Each controller was trained separately for each site using
-five seeds (42, 123, 777, 7, and 21), with a nominal budget
-of 400,000 environment steps per checkpoint. RLInv and A7
-completed 401,408 steps to accommodate whole training rollouts.
-Evaluation followed the held-out protocol in
-Section~\ref{sec:evaluation_protocol}: days 46--60,
-four delivery-logistics scenarios, and ten episodes per
-site--seed--scenario. Initial inventory was sampled from
-30--90\% of tank capacity during evaluation, and each episode
-lasted 360 hourly steps. The study therefore comprises
-200 site--controller--seed checkpoints, 8,000 evaluation
-episodes, and 2,880,000 simulated hourly steps.
-\end{revisedblock}
-
-\begin{table}[htbp]
-\centering
-\small
-\caption{\revised{Mean EENS (kWh per 360-hour episode)
-across all ten sites, five training seeds, and ten evaluation
-episodes per seed and delivery scenario. Lower is better.}}
-\label{tab:g4_rl_ten_site}
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Controller} & \textbf{Normal} & \textbf{Delayed} &
-\textbf{Monsoon} & \textbf{Extreme} \\
-\midrule
-\revised{RLInv (MaskablePPO)} & \revised{0.019} & \revised{3.119} &
-\revised{12.668} & \revised{57.072} \\
-\revised{A7 (PPO)} & \revised{0.027} & \revised{3.557} &
-\revised{12.785} & \revised{57.454} \\
-\revised{DQN} & \revised{0.019} & \revised{3.074} &
-\revised{12.153} & \revised{56.789} \\
-\revised{A2C} & \revised{0.122} & \revised{3.486} &
-\revised{12.766} & \revised{57.082} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{revisedblock}
-The RLInv means here use five training seeds per site,
-whereas the calibrated-classical comparison in
-Table~\ref{tab:calibrated_baselines} uses ten.
-The respective RLInv Extreme-scenario estimates are
-57.072 and 53.8544\,kWh per episode. These are
-different evaluated seed populations, not discrepant
-entries for an identical aggregation. The observed
-five-seed mean is approximately 6\% higher; this
-illustrates sensitivity to the choice of evaluation
-population, without identifying a unique cause for
-the difference.
-\end{revisedblock}
-
-\begin{revisedblock}
-Table~\ref{tab:g4_rl_ten_site} shows that DQN has the
-lowest numerical mean EENS under Delayed, Monsoon, and
-Extreme logistics, while RLInv records lower means than
-A7 and A2C under those scenarios. In 19 of the 40
-site--scenario combinations, EENS is exactly zero for
-all four controllers. These exact ties limit how much
-of the evaluation grid can distinguish their reliability.
-
-Exploratory paired comparisons use the site as the unit
-of analysis: evaluation episodes and training seeds are
-averaged within each site, yielding ten paired site-level
-means per scenario. None of the 12 RLInv-versus-comparator
-comparisons is statistically significant after Holm
-correction, and all non-degenerate 95\% confidence intervals
-include zero. In the Normal RLInv--DQN comparison, all ten
-paired site differences are exactly zero; the paired
-\emph{t}-test is undefined and its \emph{p}-value is
-reported as not applicable.
-\end{revisedblock}
-
-\begin{table}[htbp]
-\centering
-\small
-\caption{\revised{EENS on site5, the site with the highest
-Extreme-scenario unmet energy in the ten-site comparison.
-Values are mean kWh per 360-hour episode across five seeds
-and ten evaluation episodes per seed and scenario.}}
-\label{tab:g4_rl_site5}
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Controller} & \textbf{Normal} & \textbf{Delayed} &
-\textbf{Monsoon} & \textbf{Extreme} \\
-\midrule
-\revised{RLInv} & \revised{0.000} & \revised{12.464} &
-\revised{58.509} & \revised{257.897} \\
-\revised{A7} & \revised{0.000} & \revised{15.911} &
-\revised{61.653} & \revised{260.711} \\
-\revised{DQN} & \revised{0.000} & \revised{12.639} &
-\revised{55.240} & \revised{255.662} \\
-\revised{A2C} & \revised{0.722} & \revised{16.452} &
-\revised{60.819} & \revised{261.194} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{revisedblock}
-Site5 provides a demanding contrast to the many exact-zero
-operating points. Under Monsoon and Extreme logistics,
-DQN has numerically lower EENS than RLInv on this site,
-although the aggregate paired comparisons above remain
-inconclusive. Under Normal logistics, A2C has nonzero
-mean EENS at four sites (site3, site5, site7, and site8).
-Site5 contributes approximately 59\% and site3 25\% of
-A2C's ten-site Normal mean; the difference is therefore
-concentrated in a small number of sites.
-\end{revisedblock}
-
-\begin{table}[htbp]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\caption{\revised{Ordering and energy outcomes under Normal
-logistics for the trace-audited sites site2, site4, site6,
-site7, site8, site9, and site10 (350 episodes per
-controller). Quantity is accepted at order placement,
-not confirmed delivery. Diesel denotes energy consumed.}}
-\label{tab:g4_order_quantity_subset}
-\begin{tabular}{lrrrrrr}
-\toprule
-\textbf{Controller} &
-\shortstack{\textbf{Orders}\\\textbf{per ep.}} &
-\shortstack{\textbf{Mean order}\\\textbf{size (kWh)}} &
-\shortstack{\textbf{Accepted qty.}\\\textbf{(kWh/ep.)}} &
-\shortstack{\textbf{Mean tank}\\\textbf{inv. (\%)}} &
-\shortstack{\textbf{Diesel}\\\textbf{(kWh/ep.)}} &
-\shortstack{\textbf{EENS}\\\textbf{(kWh/ep.)}} \\
-\midrule
-\revised{RLInv} & \revised{2.114} & \revised{137.385} &
-\revised{290.47} & \revised{79.4} & \revised{194.190} & \revised{0.027} \\
-\revised{A7} & \revised{8.566} & \revised{38.820} &
-\revised{332.52} & \revised{89.9} & \revised{194.178} & \revised{0.039} \\
-\revised{DQN} & \revised{9.091} & \revised{36.727} &
-\revised{333.91} & \revised{91.6} & \revised{194.190} & \revised{0.027} \\
-\revised{A2C} & \revised{8.517} & \revised{39.076} &
-\revised{332.82} & \revised{91.0} & \revised{194.190} & \revised{0.027} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[htbp]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\caption{\revised{Order-action waterfall under Normal
-logistics for the same seven sites (350 episodes per
-controller). The size-reduced column is a subset of
-positive accepted orders, not an additional outcome.}}
-\label{tab:g4_order_waterfall}
-\begin{tabular}{lrrrrr}
-\toprule
-\textbf{Controller} &
-\shortstack{\textbf{Order}\\\textbf{requests}} &
-\shortstack{\textbf{Blocked}\\\textbf{pending}} &
-\shortstack{\textbf{Clipped}\\\textbf{to zero}} &
-\shortstack{\textbf{Positive}\\\textbf{accepted}} &
-\shortstack{\textbf{Accepted:}\\\textbf{size-reduced}} \\
-\midrule
-\revised{RLInv} & \revised{740} & \revised{0} & \revised{0} &
-\revised{740} & \revised{0} \\
-\revised{A7} & \revised{81,747} & \revised{50,586} &
-\revised{28,163} & \revised{2,998} & \revised{2,804} \\
-\revised{DQN} & \revised{83,219} & \revised{51,211} &
-\revised{28,826} & \revised{3,182} & \revised{3,012} \\
-\revised{A2C} & \revised{84,885} & \revised{54,412} &
-\revised{27,492} & \revised{2,981} & \revised{2,795} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{revisedblock}
-The trace-level ordering diagnostic in
-Tables~\ref{tab:g4_order_quantity_subset} and
-\ref{tab:g4_order_waterfall} explains the different
-replenishment patterns. Under Normal logistics, all
-four controllers consume approximately 194.2\,kWh of
-diesel energy per episode and have near-identical EENS.
-RLInv accepts 2.114 orders per episode with a mean size
-of 137.385\,kWh, against 8.517--9.091 smaller orders
-for the unmasked controllers. RLInv also holds less
-inventory on average.
-
-Of A7's 81,747 attempted order actions, 50,586 were
-blocked while a delivery was pending and 28,163 were
-clipped to zero because the available tank space did
-not permit a positive order. The remaining 2,998
-requests yielded positive accepted orders, including
-2,804 whose quantity was reduced at placement. Thus
-96.3\% of A7's requests yielded no positive order.
-
-The mechanism follows from the implemented feasibility
-interface. RLInv's pre-action mask permits an order only
-when the full requested quantity fits in the tank and
-no delivery is pending; the unmasked controllers can
-request orders that the simulator subsequently blocks
-or reduces. RLInv's absence of blocked or clipped
-requests is therefore a property of masking, not a
-separate demonstration of learned feasibility.
-Accepted order quantities are distinct from confirmed
-fuel deliveries and purchases.
-\end{revisedblock}
-
-\begin{revisedblock}
-These results also inform the choice of MaskablePPO
-in Section~\ref{sec:rationale}. In the evaluated
-simulator, the physical safety layer prevents infeasible
-orders from executing even when an unmasked controller
-requests them. The masked configuration shows a clear
-difference in ordering behaviour but no statistically
-distinguishable EENS advantage over the evaluated
-unmasked configurations. Thus, the demonstrated value
-of pre-action masking here lies in avoiding infeasible
-requests and their subsequent correction, rather than
-in an observed reliability gain.
-\end{revisedblock}
-
-\begin{revisedblock}
-A supplementary training-budget analysis compared
-DQN and A2C checkpoints after 50,000, 100,000, and
-200,000 environment steps with their final 400,000-step
-checkpoints. On site5, DQN approached its final observed
-EENS by 100,000 steps, whereas A2C showed non-monotonic
-performance. The checkpoint-level confidence intervals
-and protocol details are provided in
-\hyperref[app:rl_training_budget]{Appendix~\ref*{app:rl_training_budget}}.
-\end{revisedblock}
-
-\begin{revisedblock}
-The ten-site comparison was exploratory, and the
-observed differences describe trained controller
-configurations rather than isolated algorithmic effects.
-RLInv was trained with initial inventory sampled uniformly
-over 20--90\% of tank capacity, whereas A7, DQN, and A2C
-used a fixed initial fraction of 60\%; inventories varied
-during all training episodes. Algorithm implementations,
-optimisation settings, and the feasibility interfaces also
-differed. These factors particularly limit causal
-interpretation of ordering-frequency and inventory results.
-The original RLInv/A7 training-source contemporaneity
-qualification remains despite independent replay of the
-evaluation trajectories.
-\end{revisedblock}
-
-\begin{revisedblock}
-Statistical non-significance does not establish
-equivalence. Order counts and accepted quantities do
-not independently establish lower operating expenditure,
-and this four-algorithm study does not establish a general
-reliability advantage over the calibrated classical
-controllers in Subsection~\ref{sec:calibrated_baselines}.
-\end{revisedblock}
 
 % ============================================================
 \section[Computational Cost and Cross-Site Generalisation]
@@ -1497,6 +1238,7 @@ faster execution under the measured conditions.}}
 \bottomrule
 \end{tabular}
 \end{table}
+\end{revisedblock}
 
 \begin{revisedblock}
 All four RL controllers have approximately
@@ -1621,10 +1363,24 @@ following subsection.
 \label{sec:results_summary}
 % ============================================================
 \begin{sloppypar}
-RLInv achieves the lowest mean EENS under Normal and Extreme logistics,
-is statistically indistinguishable from the closest comparator under
-Delayed, and is nominally outperformed by the classical-ordering
-comparator (A6) under Monsoon. The ablations provide a
+Within the original policy and ablation comparisons,
+RLInv records the lowest mean EENS under Normal and
+Extreme logistics, is statistically indistinguishable
+from the closest comparator under Delayed logistics,
+and is numerically outperformed by A6 under Monsoon
+logistics.
+
+However, the expanded calibrated-classical comparison
+shows that B1*-HighBuffer achieves lower mean EENS
+than RLInv under Delayed, Monsoon, and Extreme logistics,
+while RLInv retains the lower mean under Normal logistics.
+B1*-HighBuffer also places fewer orders than RLInv
+across all four scenarios.
+
+These findings demonstrate that careful calibration
+of classical inventory-ordering thresholds can match
+or outperform the proposed reinforcement learning
+controller under stressed delivery conditions. The ablations provide a
 more qualified explanation than the primary comparison alone. The
 additional benefit of jointly learned replenishment is
 scenario-dependent, appearing under Normal and Extreme conditions but
