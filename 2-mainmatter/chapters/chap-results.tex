@@ -1013,6 +1013,208 @@ The detailed results are presented in
 
 
 % ============================================================
+\section[Computational Cost and Cross-Site Generalisation]
+{\revised{Computational Cost and Cross-Site Generalisation}}
+\label{sec:computational_generalisation}
+% ============================================================
+
+\subsection[Computational Cost of the Controllers]
+{\revised{Computational Cost of the Controllers}}
+\label{sec:controller_computational_cost}
+
+\begin{revisedblock}
+In addition to reliability, the computational cost
+of a controller is relevant to its practical
+application. The controllers were therefore
+examined in terms of decision latency, model size,
+and recorded training effort.
+
+The measurements were performed on a Windows 11
+computer with a six-core AMD processor and
+approximately 8 GB of RAM, using CPU execution.
+For the four RL controllers, 15 trained models
+per algorithm were benchmarked across site1,
+site3, and site5, with five training seeds per
+site. Each measurement used 100 warm-up calls
+followed by 1,000 timed decisions.
+
+
+Table~\ref{tab:rl_computational_cost} reports
+decision latency across the 15 trained models
+of each RL algorithm. For each model, 1,000
+decisions were timed, and the median latency
+was calculated. The reported value is the
+median across these 15 model-level results.
+
+Two measurements are reported: policy-call
+latency, which times the model prediction
+interface, and controller-call latency, which
+additionally includes observation 
+normalisation
+and the implemented action-selection interface.
+Both exclude simulator stepping and external
+communication.
+
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{\revised{Measured computational characteristics
+of the four RL controllers. Decision times are
+reported in milliseconds; lower latency indicates
+faster execution under the measured conditions.}}
+\label{tab:rl_computational_cost}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Controller} &
+\textbf{Parameters} &
+\textbf{Size (MiB)} &
+\textbf{Policy (ms)} &
+\textbf{Controller (ms)} \\
+\midrule
+\revised{RLInv} &
+\revised{139,527} &
+\revised{1.628} &
+\revised{1.182} &
+\revised{1.421} \\
+\revised{A7} &
+\revised{139,527} &
+\revised{1.629} &
+\revised{0.640} &
+\revised{0.867} \\
+\revised{DQN} &
+\revised{140,812} &
+\revised{1.102} &
+\revised{0.372} &
+\revised{0.538} \\
+\revised{A2C} &
+\revised{139,527} &
+\revised{1.629} &
+\revised{0.651} &
+\revised{0.863} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+All four RL controllers have approximately
+140,000 trainable parameters, and their saved
+model files occupy approximately 1.1--1.6 MiB.
+
+Each controller's action-producing network
+contains 70,406 parameters, although the
+complete training architectures differ.
+
+
+DQN records the lowest measured controller
+latency at 0.538 ms, followed by A2C at
+0.863 ms, A7 at 0.867 ms, and RLInv at
+1.421 ms. These measurements demonstrate that
+individual decisions can be computed within
+a few milliseconds on the tested CPU.
+
+The timings are implementation-specific.
+They include different algorithm interfaces
+and, for unmasked controllers, additional
+handling within the evaluation interface.
+The measured observations also arise from
+policy-specific trajectories. Consequently,
+the timing differences cannot be attributed
+solely to the learning algorithm or to
+action masking.
+\end{revisedblock}
+
+\begin{revisedblock}
+The computational comparison was extended to
+the original rule-based inventory controller
+(B1), the 24-hour rolling-horizon MPC controller,
+and the perfect-information Oracle-MPC reference.
+Table~\ref{tab:classical_computational_cost}
+reports their measured decision times.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{\revised{Measured decision latency of classical
+and optimisation-based reference controllers.
+Oracle-MPC was assessed using a smaller
+diagnostic sample.}}
+\label{tab:classical_computational_cost}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Controller} &
+\textbf{Median (ms)} &
+\textbf{Timed decisions} \\
+\midrule
+\revised{B1-Original} &
+\revised{0.0181} & \revised{1,000} \\
+\revised{MPC ($H=24$ h)} &
+\revised{8.511} & \revised{1,000} \\
+\revised{Oracle-MPC ($H=360$ h)} &
+\revised{500.707} & \revised{20} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+The original B1 threshold controller has the
+lowest measured decision latency, as expected
+from its simple rule-based implementation.
+The 24-hour MPC controller requires more
+computation because it solves an optimisation
+problem at each decision. The substantially
+longer Oracle-MPC horizon and its access to
+future information make it a different,
+offline reference problem. Its latency is
+based on only 20 diagnostic calls and is
+not directly comparable in measurement
+precision with the other controllers.
+
+The classical-controller timings use the
+original fixed B1 thresholds, not the
+site-calibrated B1* configurations examined
+in Section~7.6.1. All reported measurements
+exclude environment stepping and external
+communication overhead. They therefore
+characterise local decision computation,
+rather than complete deployment latency.
+\end{revisedblock}
+
+\begin{revisedblock}
+Recorded production training times also show
+differences in computational effort. The median
+training duration was 53.69 minutes for DQN
+and 5.16 minutes for A2C under the recorded
+training configuration. These values describe
+the implemented training runs, not an
+algorithm-independent speed comparison.
+
+The historical RLInv timing record includes
+an MLflow session interval rather than an
+equivalent production training-duration
+measurement, while the original A7 training
+duration could not be independently established.
+They are therefore excluded from the direct
+training-time comparison.
+
+Overall, the benchmarks show that the evaluated
+RL controllers require only millisecond-scale
+computation per decision on the tested CPU.
+This supports the computational practicality
+of the proposed tower-level control approach.
+
+The measurements are limited to local controller
+execution and do not include data acquisition,
+external communication, or physical deployment.
+Cross-site generalisation of the learned
+control policy is examined separately in the
+following subsection.
+
+\end{revisedblock}
+
+
+% ============================================================
 \section{Summary}
 \label{sec:results_summary}
 % ============================================================
