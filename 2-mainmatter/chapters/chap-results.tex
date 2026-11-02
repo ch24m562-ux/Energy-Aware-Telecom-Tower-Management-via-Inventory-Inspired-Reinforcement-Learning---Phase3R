@@ -169,7 +169,7 @@ overall performance in the evaluated grid (Figure~\ref{fig:eens_comparison}); th
 examine how much of that result can be attributed to joint replenishment
 learning and the other design choices. This motivates the mechanistic analysis in
 Section~\ref{sec:mechanism}, where the three pre-specified ablation
-studies isolate the individual contributions of coupled replenishment
+studies investigate the individual contributions of coupled replenishment
 learning, action masking, and inventory-aware state representation.
 
 \begin{figure}[htb]
@@ -319,8 +319,9 @@ under Normal or Delayed logistics (identical or not significant), but a
 very large, highly significant effect under Monsoon ($d_z=-10.2$,
 $p<0.0001$) and Extreme ($d_z=-4.6$, $p<0.0001$), both favouring the
 masked (A6) variant (Figure~\ref{fig:ablation_h2}). Separately, RLInv vs.\ A7 (vanilla PPO, no
-masking, otherwise identical to RLInv, so ordering is already jointly
-learned in both, and both share the same 11-dimensional observation)
+masking, using the same observation space and jointly
+learned ordering as RLInv, but a different
+initial-inventory training distribution)
 shows no significant difference in any scenario
 ($|d_z|\leq 0.37$ throughout).
 
@@ -331,14 +332,13 @@ designs also differ; the resulting gap is also confounded with
 whether ordering is jointly learned, since RLInv and TrackB differ in
 that respect too. The defensible claim is that masking is associated
 with a substantial part of the RLInv--TrackB gap under Monsoon/Extreme,
-not all of it. The cleaner RLInv-vs-A7 comparison (identical
-observation space, ordering already jointly learned in both) shows no
-statistically distinguishable mean-EENS effect from masking in any
-scenario. Both A6 and TrackB record zero explicit hard constraint
+not all of it. The RLInv--A7 comparison shows no statistically
+significant mean-EENS difference, but does not
+isolate masking because the historical
+training-inventory distributions differed. Both A6 and TrackB record zero explicit hard constraint
 violations, so the A6--TrackB effect is not about constraint
-enforcement \emph{per se}. Masking's benefit is therefore conditional
-on ordering being externally managed, not a general main effect of the
-learning algorithm.
+enforcement \emph{per se}. These comparisons do not establish a general
+independent mean-EENS benefit from masking.
 
 \begin{figure}[htb]
 \centering
@@ -931,17 +931,15 @@ episodes per seed and delivery scenario. Lower is better.}}
 \end{table}
 
 \begin{revisedblock}
-The RLInv means here use five training seeds per site,
-whereas the calibrated-classical comparison in
-Table~\ref{tab:calibrated_baselines} uses ten.
-The respective RLInv Extreme-scenario estimates are
-57.072 and 53.8544\,kWh per episode. These are
-different evaluated seed populations, not discrepant
-entries for an identical aggregation. The observed
-five-seed mean is approximately 6\% higher; this
-illustrates sensitivity to the choice of evaluation
-population, without identifying a unique cause for
-the difference.
+The five-seed RLInv comparison uses seeds
+42, 123, 777, 7, and 21, which form a subset
+of the ten seeds used in the original evaluation.
+Reaggregating the original held-out RLInv results
+under Extreme logistics gives 57.0719\,kWh per
+episode for these five seeds and 53.8544\,kWh
+for all ten. The approximately 6\% difference
+is therefore explained by the different
+training-seed aggregations.
 \end{revisedblock}
 
 \begin{revisedblock}
@@ -1150,16 +1148,15 @@ controllers in Subsection~\ref{sec:calibrated_baselines}.
 
 
 % ============================================================
-\section[Computational Cost and Cross-Site Generalisation]
-{\revised{Computational Cost and Cross-Site Generalisation}}
+\section[Computational Cost and Practical Considerations]
+{\revised{Computational Cost and Practical Considerations}}
 \label{sec:computational_generalisation}
 % ============================================================
-Scalability is examined from two perspectives:
-the computational cost of executing individual
-controller decisions and the ability to reuse
-a trained policy across previously unseen sites.
-These evaluations do not constitute an
-end-to-end multi-tower deployment benchmark.
+Scalability is examined through the computational
+cost of controller decisions, model size, and
+recorded training effort. These evaluations
+do not constitute an end-to-end multi-tower
+deployment benchmark.
 
 \subsection[Computational Cost of the Controllers]
 {\revised{Computational Cost of the Controllers}}

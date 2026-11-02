@@ -136,9 +136,13 @@ the probability of any infeasible action exactly zero by construction. This
 converts the constraint set $\mathcal{C}(s_t)$ into a hard structural
 property of the policy distribution rather than something the policy must
 learn to avoid; a violation-backstop coefficient ($\mu$) is still retained
-(Section~\ref{sec:reward_design}) as a secondary safeguard. Ablation~A7
-trains an otherwise identical agent without action masking, giving a direct
-empirical test of this claim (Chapter~\ref{chap:results}).
+(Section~\ref{sec:reward_design}) as a secondary safeguard. \revised{A7 is an unmasked PPO comparator.
+Its historical training used a fixed initial-inventory
+fraction of 0.60, whereas RLInv used a uniform
+distribution over $[0.20,0.90]$. Consequently,
+this comparison does not isolate the causal
+effect of action masking
+(Chapter~\ref{chap:results}).}
 
 \subsection{Why a unified agent (RLInv) alongside decomposed control?}
 
@@ -369,8 +373,8 @@ benefit from masking under stressed logistics when replenishment is
 externally managed, rather than masking acting primarily to eliminate
 constraint violations. The A6--TrackB comparison also differs in
 observation design (Section~\ref{sec:comparison_policies}), so this gap should not
-be attributed to masking alone; the cleaner masking comparison is
-RLInv vs.\ A7, which found no significant mean-EENS effect.
+be attributed to masking alone; \revised{the RLInv--A7 comparison found no
+statistically significant mean-EENS difference.}
 
 \subsection{Agent architecture and training}
 
@@ -457,7 +461,8 @@ $n_{\text{steps}}$     & 2048                               & Rollout buffer len
 Batch size             & 256                                & CPU-friendly mini-batch \\
 $n_{\text{epochs}}$    & 10                                 & PPO inner loop \\
 Parallel environments  & 4 (\texttt{SubprocVecEnv})         & CPU parallelism; reduced from 8 due to OS process handle limits \\
-Seeds                  & 42, 123, 777, 7, 13, 21, 99, 314, 500, 999 & Mean $\pm$ 95\% CI over 10 seeds reported throughout Chapter~\ref{chap:results} \\
+Seeds                  & 42, 123, 777, 7, 13, 21, 99, 314, 500, 999 & \revised{Ten training seeds for the original
+policy and ablation comparisons}\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -650,8 +655,8 @@ dispatch, requiring no training. \revised{\textbf{B1} uses fixed $(s,S)$ orderin
 similar to B0, with a default SoC threshold of 0.25
 compared with 0.15 in B0.}
 
-\textbf{A7} is vanilla PPO trained without action masking, isolating the
-contribution of the masking safety mechanism.
+\textbf{A7} is vanilla PPO trained without action masking and serves as an
+unmasked comparator.
 
 \textbf{A5} removes five logistics/inventory-related channels via a
 \texttt{NoInvObsWrapper}: inventory level ($\Inv_t$), pending-delivery
