@@ -18,6 +18,14 @@ four delivery-logistics scenarios), reported primarily as Expected
 Energy Not Served (EENS), with the site, scenario, and metric
 definitions given in Chapter~\ref{chap:methodology}.
 
+\revised{The original primary evaluation uses ten
+training seeds. The supplementary four-algorithm
+comparison uses five seeds, while the cross-site
+generalisation and adaptation experiments use
+three seeds. These evaluations are reported
+separately because their experimental
+populations differ.}
+
 % ============================================================
 \section{Primary Comparison}
 \label{sec:primary_comparison}
@@ -844,13 +852,14 @@ under the same conditions as Table~\ref{tab:calibrated_baselines}.}}
 
 \begin{revisedblock}
 Calibration substantially changes the classical
-controller's reliability. In particular,
-B1*-HighBuffer records numerically lower mean EENS
-than RLInv in three of the four delivery scenarios:
-Delayed (3.3952 versus 3.5992), Monsoon (11.2822
-versus 11.2865), and Extreme (53.1643 versus
-53.8544\,kWh per episode). RLInv retains the lowest
-mean under Normal logistics (0.0189 versus 0.0628).
+controller's reliability. B1*-HighBuffer records
+lower mean EENS than RLInv under Delayed
+(3.3952 versus 3.5992) and Extreme
+(53.1643 versus 53.8544\,kWh per episode)
+logistics. Under Monsoon, their mean EENS is
+nearly identical (11.2822 versus 11.2865).
+RLInv retains the lower mean under Normal
+logistics (0.0189 versus 0.0628).
 HighBuffer also places fewer accepted orders than
 RLInv in all four scenarios. Thus, on this benchmark,
 the proposed learned controller does not establish a
@@ -1148,15 +1157,18 @@ controllers in Subsection~\ref{sec:calibrated_baselines}.
 
 
 % ============================================================
-\section[Computational Cost and Practical Considerations]
-{\revised{Computational Cost and Practical Considerations}}
+\section[Computational Cost and Cross-Site Generalisation]
+{\revised{Computational Cost and Cross-Site Generalisation}}
 \label{sec:computational_generalisation}
 % ============================================================
-Scalability is examined through the computational
-cost of controller decisions, model size, and
-recorded training effort. These evaluations
-do not constitute an end-to-end multi-tower
-deployment benchmark.
+\revised{Scalability is examined through computational
+decision cost and cross-site generalisation. The first
+dimension considers inference latency, model size,
+and recorded training effort. The second evaluates
+shared-policy zero-shot transfer, target-site
+adaptation, source-calibrated classical baselines,
+and training-seed variability. These tests do not
+constitute a multi-tower deployment benchmark.}
 
 \subsection[Computational Cost of the Controllers]
 {\revised{Computational Cost of the Controllers}}
@@ -1352,6 +1364,421 @@ Cross-site generalisation of the learned
 control policy is examined separately in the
 following subsection.
 
+\end{revisedblock}
+
+% Phase3R — G5b results insertion; evidence-reconciled review revision 3 November 2026.
+% TARGET: Insert in 2-mainmatter/chapters/chap-results.tex immediately AFTER
+% the end of §7.7.1 (Computational Cost of the Controllers) and BEFORE
+% \section{Summary}.
+% This is a proposed source-backed draft, NOT a commit or compiled thesis.
+% Parent §7.7 heading should separately be renamed to
+% "Computational Cost and Cross-Site Generalisation", preserving its label.
+% REQUIRES companion study-cohort table with label tab:phase3r_study_cohorts
+% in Chapter 7 Experimental Overview, before the primary comparison.
+% Evidence: results/phase3r/g5b_shared_v1 (15 CSVs, 15 PSG),
+% g5b_transfer_analysis_v1, g5b_adaptation_v2 (24 CSVs),
+% g5b_adaptation_psg_native_v1 (24 PSG), g5b_shared_b1_v1,
+% g5b_shared_b1_psg_v1 (45 PSG), g5b_scratch50_distribution_v1.
+% Scientific/release scope: G5b-native PSG passes do NOT upgrade historical
+% G4 RLInv/A7 ECG qualifications. Mentor approval and PDF review are separate.
+
+% ============================================================
+\subsection[Cross-Site Zero-Shot Generalisation]
+{\revised{Cross-Site Zero-Shot Generalisation}}
+\label{sec:g5b_zero_shot}
+% ============================================================
+\begin{revisedblock}
+Computational speed alone does not establish that a learned
+controller can generalise across sites. To examine this,
+a shared RLInv (MaskablePPO) controller was trained on
+sites~1, 2, 3, 7, and 8, using days~1--45 of each site's
+series. Three independently seeded shared policies were
+trained (seeds~42, 123, 777).
+
+For each training seed, five independently trained
+site-specific policies require
+$5 \times 400{,}000 = 2{,}000{,}000$ nominal environment
+interactions. One shared policy uses 400,000 nominal
+interactions in total across the five source sites,
+approximately fivefold fewer. The shared training
+runs actually recorded 401,408 interactions per seed,
+averaging approximately 80,000 interactions per
+source site.
+
+As shown below, the shared and site-specific policies
+produce identical EENS in 53 of 60 matched
+site--seed--scenario cells, although many comparisons
+are zero-EENS ties and the main differences occur at
+site5. The fivefold figure describes nominal training
+interactions, not a measured reduction in training
+wall-clock time or deployment cost. The observation
+normalizer was fitted without held-out-site observations.
+
+The frozen shared checkpoints were then applied without target-site
+updates to sites~4, 5, 6, 9, and 10. For each trained seed and held-out
+site, evaluation used days~46--60, four delivery scenarios, and ten
+360-hour episodes per scenario, with initial inventory sampled from
+30--90\% of tank capacity. This produces 15 evaluation jobs and 600
+episodes. The independent native physical-safety gate (PSG) reports
+15/15 PASS, including 216,000 checked step traces and 60 deliberate
+negative controls. The comparator is a historical site-specific RLInv
+controller trained on that target site for a nominal 400,000 steps.
+Only the matched three-seed subset (42, 123, 777) is used here,
+not the five-seed G4 or ten-seed original results. Its episode keys and
+initial inventories were matched, but it retains
+the historical training-provenance qualifications discussed in the
+experimental-integrity section. The same initial state does not require
+identical later supplier randomness because different ordering actions
+can alter the sequence of supplier events.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{\revised{Zero-shot shared RLInv versus site-specific
+RLInv trained for 400k steps: mean EENS (kWh per 360-hour
+held-out episode). Each site/scenario mean averages the same
+three training seeds (42, 123, 777) and ten episodes per seed.
+The local column is the historical three-seed subset, not the
+original ten-seed or G4 five-seed aggregate. S denotes shared zero-shot;
+L denotes local site-specific 400k. Normal-scenario EENS is
+zero for both controllers at all five sites.}}
+\label{tab:g5b_zero_shot_sites}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Site} & \multicolumn{2}{c}{\textbf{Delayed}} &
+\multicolumn{2}{c}{\textbf{Monsoon}} &
+\multicolumn{2}{c}{\textbf{Extreme}} \\
+& \textbf{S} & \textbf{L} & \textbf{S} & \textbf{L} & \textbf{S} & \textbf{L} \\
+\midrule
+\revised{site4}  & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.339} & \revised{0.339} \\
+\revised{site5}  & \revised{12.211} & \revised{8.606} & \revised{40.899} & \revised{35.574} & \revised{259.463} & \revised{253.472} \\
+\revised{site6}  & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} \\
+\revised{site9}  & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} \\
+\revised{site10} & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} & \revised{0.000} \\
+\midrule
+\revised{Five-site mean} & \revised{2.442} & \revised{1.721} & \revised{8.180} & \revised{7.115} & \revised{51.960} & \revised{50.762} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+Table~\ref{tab:g5b_zero_shot_sites} shows comparable aggregate
+reliability, but not an improvement over site-specific training.
+Site-specific RLInv has lower mean EENS under Delayed, Monsoon, and
+Extreme logistics. Among the 60 matched site--seed--scenario mean
+comparisons, 53 have exactly the same EENS; all seven non-zero
+differences occur at site5. Many exact ties arise in low-risk
+site--scenario cells with zero EENS and therefore do not demonstrate
+equivalent learned policies. This echoes the weak discrimination
+observed in the four-algorithm results of
+Subsection~\ref{sec:g4_rl_comparison}; those results have a different
+five-seed evaluation population, so their means must not be substituted
+for this three-seed local comparator. In the shared model, the site5 means are
+12.211, 40.899, and 259.463\,kWh under these three stressed scenarios,
+versus 8.606, 35.574, and 253.472\,kWh for the local controller.
+Across the three shared seeds at site5, the corresponding between-seed
+standard deviations are 18.784, 34.705, and 20.003\,kWh, respectively.
+Consequently, these small aggregate differences do not constitute
+statistical evidence of equivalence or universal transfer success.
+
+The frozen conditional trigger for an additional shared 800k-step
+sensitivity run was not met: the equal-site Delayed-scenario deficit
+relative to local training was approximately 41.9\% and
+0.721\,kWh/episode, whereas the trigger required both more than 50\%
+and more than 2\,kWh. This explains why that supplementary retraining
+was not undertaken. Site6 has zero residual-at-risk demand under the
+fixed evaluated energy-priority dispatch and therefore cannot
+meaningfully discriminate reliable inventory policies. Sites~9 and 10
+also have zero EENS in every tested scenario for both controllers.
+These five held-out sites remain within the source dataset and
+represented operating classes; this experiment does not establish
+cross-region or real-world fleet-wide generalisation.
+\end{revisedblock}
+
+% ============================================================
+\subsection[Target-Site Adaptation Versus Training from Scratch]
+{\revised{Target-Site Adaptation Versus Training from Scratch}}
+\label{sec:g5b_adaptation}
+% ============================================================
+\begin{revisedblock}
+A separate experiment examined whether limited target-site training
+could improve deployment on a previously unseen site. Two targets
+were selected: site4 (moderately constrained) and site5 (strongly
+constrained). For each target and each of the three seeds, the
+shared-policy parent was fine-tuned for an additional nominal
+50,000 or 100,000 target-site interactions. The corresponding
+scratch controls were trained on that same target site for only
+50,000 or 100,000 nominal interactions. Each fine-tuning arm was
+started afresh from the same-seed shared 400k parent; it was not
+successively continued from the 50k target checkpoint. Actual
+rollout-aligned counts were 57,344 and 106,496 steps for the short
+budgets. Evaluation used the same four scenarios and ten matched
+held-out episodes per seed/scenario. All 24 job-level native PSG
+reports passed (960 episodes, 345,600 evaluated hourly steps).
+
+This design matches \emph{additional target-site interactions}, not
+\emph{total training interactions}. Fine-tuned policies benefit from
+400k prior source-site interactions; scratch policies do not. Thus,
+any short-budget difference measures an end-to-end pretraining and
+adaptation advantage under the stated budgets, not the isolated causal
+effect of the fine-tuning update.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{\revised{Site5 mean EENS (kWh per 360-hour episode)
+under zero-shot, scratch and fine-tuned RLInv checkpoints.
+Entries are the equal-weight mean of three independently seeded
+policies, each evaluated on ten episodes per logistics scenario.
+The 400k scratch comparator is historical and separately qualified.}}
+\label{tab:g5b_site5_adaptation}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Controller} & \textbf{Normal} & \textbf{Delayed} &
+\textbf{Monsoon} & \textbf{Extreme} \\
+\midrule
+\revised{Shared zero-shot (400k source)} & \revised{0.000} & \revised{12.211} & \revised{40.899} & \revised{259.463} \\
+\revised{Scratch, 50k target} & \revised{54.932} & \revised{115.831} & \revised{167.206} & \revised{376.736} \\
+\revised{Fine-tune, 50k target} & \revised{0.000} & \revised{12.211} & \revised{40.899} & \revised{260.207} \\
+\revised{Scratch, 100k target} & \revised{1.204} & \revised{13.715} & \revised{42.418} & \revised{261.263} \\
+\revised{Fine-tune, 100k target} & \revised{0.000} & \revised{12.211} & \revised{40.899} & \revised{261.594} \\
+\revised{Scratch, 400k target (reference)} & \revised{0.000} & \revised{8.606} & \revised{35.574} & \revised{253.472} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+At site4, all five tested configurations---zero-shot, scratch50,
+scratch100, fine-tune50, and fine-tune100---have zero mean EENS
+under Normal, Delayed and Monsoon logistics, and the same
+0.339\,kWh mean under Extreme logistics. The site is therefore
+non-discriminating for this adaptation comparison, although
+ordering frequencies are not necessarily identical.
+
+At site5, the shorter training budget reveals a different pattern
+(Table~\ref{tab:g5b_site5_adaptation}). Scratch50 has mean EENS
+of 54.932, 115.832, 167.206, and 376.736\,kWh over the four
+scenarios, whereas FineTune50 records 0, 12.211, 40.899,
+and 260.207\,kWh. The largest Delayed and Monsoon gaps
+also show substantial between-seed variation in Scratch50:
+the standard deviations are 141.952 and 179.786\,kWh,
+respectively. Seed~42 contributes disproportionately to the
+50k difference: its paired FineTune50-minus-Scratch50 EENS
+differences are $-279.713$\,kWh under Delayed and
+$-342.607$\,kWh under Monsoon logistics. At 100k target interactions the scratch results
+approach the fine-tuned results, with a small reversal under
+Extreme logistics (Scratch100: 261.263; FineTune100: 261.594\,kWh).
+
+The fine-tuning result is more specific than a general
+absence of additional gain. On site5, both fine-tuned
+checkpoints reproduce the zero-shot parent's EENS
+exactly at the trained-seed mean level under Normal,
+Delayed, and Monsoon logistics.
+
+However, the accepted-order frequencies are not
+identical. Under Delayed logistics, the mean number
+of accepted orders per 360-hour episode changes from
+4.433 for zero-shot to 4.400 for FineTune50 and 4.533
+for FineTune100. Under Monsoon logistics, the
+corresponding values are 3.800, 3.833, and 3.933.
+Thus, the target-site updates alter ordering behaviour
+without improving measured EENS in these scenarios.
+
+Under Extreme logistics, mean EENS increases
+monotonically from 259.463 kWh for the zero-shot
+parent to 260.207 kWh for FineTune50 and
+261.594 kWh for FineTune100. These small
+deteriorations arise from seed~42; the other two
+trained seeds retain their original EENS.
+
+Consequently, neither the 57,344-step nor the
+106,496-step target-site update provides an observed
+reliability improvement over the source-trained
+parent on site5. These observations concern
+evaluated outcomes, not equality of network
+parameters or complete policy trajectories.
+
+The large Scratch50--FineTune50 contrast instead mainly reflects the
+advantage of \emph{starting with} the already trained shared model.
+At 100k target steps, scratch performance approaches the fine-tuned
+checkpoint, and site4 does not discriminate among the arms. These
+results support a conditional short-target-budget pretraining
+advantage on one challenging held-out site, not an independently
+measured benefit of fine-tuning itself. There are only three learned
+seed replicates; stochastic episodes and scenarios are repeated
+observations within them. The result is descriptive and cannot be
+extrapolated into a general transfer-success rate or claim of
+monotonic degradation across other sites or training budgets.
+\end{revisedblock}
+
+% ============================================================
+\subsection[Source-Calibrated Classical Baselines Versus Shared RLInv]
+{\revised{Source-Calibrated Classical Baselines Versus Shared RLInv}}
+\label{sec:g5b_shared_b1}
+% ============================================================
+\begin{revisedblock}
+The calibrated classical controllers in
+Subsection~\ref{sec:calibrated_baselines} use site-specific threshold
+selection, whereas the shared RLInv model receives no target-site
+training. To address this difference in information access, a further
+\emph{exploratory, post-outcome-motivated} comparison selected one
+common $(s,S)$ configuration using \emph{only} the five G5b source
+sites, and then applied it unchanged across the five held-out sites.
+This supplementary design was motivated after inspecting the earlier
+G5b outcomes and is not presented as a preregistered primary test.
+The source-only calibration reused 45 coarse $(s,S)$ candidates
+from the existing G3 calibration records, restricted to source-site
+training-window results. The held-out sites were not used to select
+parameters. B1-Original uses $(s,S)=(0.25,0.85)$;
+B1-Shared-Deployable uses $(0.45,0.95)$; and
+B1-Shared-HighBuffer uses $(0.65,0.95)$.
+
+The three classical configurations each generated 15 matched
+held-out evaluation jobs over the five sites and three evaluation
+seed blocks, for 45 jobs and 1,800 episodes. All 45 native PSG
+reports passed. Shared RLInv's earlier 15 PSG reports also passed
+on independent reinspection. Threshold calibration and policy
+training do not have equal computational cost, and the controllers
+differ in decision logic; this is a fairer \emph{source-data-access}
+comparison, not an isolated algorithm or equal-compute comparison.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{\revised{Shared RLInv and source-calibrated classical
+controllers on the five unseen sites. EENS is in kWh/360-hour episode;
+orders is the mean number of accepted positive orders/episode.
+Results average three seed blocks and ten episodes per site/scenario;
+classical seed blocks index evaluation randomness, not learned models.}}
+\label{tab:g5b_shared_b1_fairness}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+& \multicolumn{4}{c}{\textbf{Mean EENS}} & \multicolumn{4}{c}{\textbf{Mean accepted orders}} \\
+\textbf{Controller} & N & D & M & E & N & D & M & E \\
+\midrule
+\revised{B1-Original} & \revised{2.685} & \revised{10.249} & \revised{16.088} & \revised{52.352} & \revised{0.527} & \revised{0.513} & \revised{0.507} & \revised{0.413} \\
+\revised{B1-Shared-Deployable} & \revised{0.730} & \revised{5.020} & \revised{13.136} & \revised{54.050} & \revised{1.180} & \revised{1.147} & \revised{1.093} & \revised{0.753} \\
+\revised{B1-Shared-HighBuffer} & \revised{0.000} & \revised{2.669} & \revised{8.949} & \revised{50.756} & \revised{1.773} & \revised{1.733} & \revised{1.620} & \revised{1.140} \\
+\revised{Shared RLInv} & \revised{0.000} & \revised{2.442} & \revised{8.180} & \revised{51.960} & \revised{1.987} & \revised{1.947} & \revised{1.807} & \revised{1.273} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+Table~\ref{tab:g5b_shared_b1_fairness} shows that both shared
+RLInv and B1-Shared-HighBuffer achieve zero mean EENS under Normal
+logistics. Shared RLInv has slightly lower mean EENS under Delayed
+(2.442 versus 2.669\,kWh) and Monsoon (8.180 versus 8.949\,kWh),
+while HighBuffer has lower mean EENS under Extreme logistics
+(50.756 versus 51.960\,kWh). HighBuffer places fewer orders in
+every scenario. At site5, for example, HighBuffer's Extreme EENS
+is 249.931\,kWh versus RLInv's 259.463\,kWh, while at site4
+their Extreme means are 3.819 and 0.339\,kWh, respectively.
+Thus, the small pooled contrasts conceal site-level trade-offs.
+
+The source-only classical calibration substantially strengthens the
+baseline challenge to the learned shared controller. The defensible
+result is a scenario-dependent reliability-versus-order-frequency
+frontier, not general superiority of RLInv or equivalence of the
+policies. A matched episode count of 600 per controller does not create
+600 independent learned-policy replicates; only three independent
+shared RLInv policies were trained, and all five held-out site
+outcomes are nested within them. The additional comparison should
+therefore be interpreted descriptively without confirmatory
+significance claims.
+\end{revisedblock}
+
+% ============================================================
+\subsection[Transfer Variability and Scalability Limitations]
+{\revised{Transfer Variability and Scalability Limitations}}
+\label{sec:g5b_scalability_limits}
+% ============================================================
+\begin{revisedblock}
+The adaptation results depend on the training seed, particularly for
+short scratch training at the difficult site5. An additive,
+post-outcome-motivated diagnostic trained ten further Scratch50
+policies on site5, yielding thirteen scratch-only seeds in total.
+Table~\ref{tab:g5b_scratch50_variability} reports all four
+scenarios, distinguishing the original three seeds, the additional ten
+seeds selected after inspection of the initial results, and their
+descriptive combined distribution. In the combined 13-seed cohort, Monsoon EENS
+has mean 197.472\,kWh and SD 191.257\,kWh; the distinct Delayed
+figures are 152.304 and 192.836\,kWh, respectively. The additional ten-seed cohort has higher mean EENS
+than the original three-seed cohort in all four
+scenarios, but this comparison is strongly influenced
+by seed~1008. That seed records exceptionally high
+EENS of 681.694, 679.194, 679.194, and 658.963 kWh
+under Normal, Delayed, Monsoon, and Extreme logistics,
+respectively.
+
+As a post-hoc diagnostic, excluding seed~1008 gives
+mean EENS of 25.413, 105.918, 154.036, and
+385.135 kWh for the remaining nine new seeds.
+These values are lower than the original three-seed
+means of 54.932, 115.831, and 167.206 kWh in
+Normal, Delayed, and Monsoon conditions, but slightly
+higher than the original Extreme mean of
+376.736 kWh.
+
+Seed~1008 is retained in the reported ten-seed
+and thirteen-seed cohort statistics. The exclusion
+is used only to identify the influence of an extreme
+training-seed outcome, not to redefine the
+evaluation population or remove a valid result. A common
+separate evaluation seed (424242) also showed substantial
+between-policy variation; however, using the same evaluation seed
+does not force identical supplier-event paths when actions differ.
+Ten new-seed own-evaluation PSG checks and thirteen common-evaluation
+PSG checks passed. This extension is descriptive: no additional
+matched FineTune50 policies were trained for the ten new seeds,
+and it cannot be used to upgrade the original three-seed
+fine-tuning comparison to a thirteen-seed paired study.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{\revised{Scratch50 site5 exploratory EENS distribution across all
+four delivery scenarios. Entries are mean $\pm$ sample SD across trained
+seed-level mean EENS values (kWh/360-hour episode), not 10 independent
+episodes per seed. The original three and subsequent ten seed cohorts
+are reported separately; the combined row is descriptive only.}}
+\label{tab:g5b_scratch50_variability}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Cohort} & \textbf{Normal} & \textbf{Delayed} & \textbf{Monsoon} & \textbf{Extreme} \\
+\midrule
+\revised{Original 3 seeds} & \revised{$54.932\pm91.304$} & \revised{$115.831\pm141.952$} & \revised{$167.206\pm179.786$} & \revised{$376.736\pm169.822$} \\
+\revised{New 10 seeds} & \revised{$91.041\pm211.260$} & \revised{$163.245\pm211.013$} & \revised{$206.552\pm202.960$} & \revised{$412.518\pm138.356$} \\
+\revised{Combined 13 seeds} & \revised{$82.708\pm187.385$} & \revised{$152.304\pm192.836$} & \revised{$197.472\pm191.257$} & \revised{$404.261\pm139.318$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+The combined scalability evidence therefore has five boundaries.
+First, measured CPU decision latencies describe local policy calls,
+not tower-to-cloud communication or end-to-end deployment.
+Second, the shared-policy evidence consists of three trained
+replicates and five held-out sites within a single 60-day
+ITU/Zindi dataset, without seasonal or geographical external
+validation. Third, supplier delays and inventory variables remain
+simulator-defined rather than calibrated to real delivery records.
+Fourth, shared training uses fewer interactions per site than
+five separately trained 400k policies; the transfer results do
+not equalise source-site exposure or total computation across
+algorithms and baselines. Finally, each tower is simulated
+independently: competition for trucks, shared depots, network
+coordination and fleet-wide scheduling costs have not been measured.
+Consequently, the evidence supports tower-level computational
+feasibility and a conditional cross-site pretraining advantage,
+not a demonstrated scalable multi-tower deployment system.
 \end{revisedblock}
 
 
