@@ -990,32 +990,56 @@ they do not establish lower total operating cost or statistical
 superiority, since accepted orders do not measure fuel quantity,
 procurement expenditure or inventory-holding cost.
 
-The no-order reference controllers are
-logistics-scenario invariant; introducing greedy
-diesel dispatch reduces their mean EENS by
-136.562\,kWh per episode in every scenario. 
-The other reference controllers clarify the source
-of reliability. No-DG/no-order yields
-222.932\,kWh mean EENS and no diesel supply.
-Allowing greedy diesel dispatch from initial
-inventory, without replenishment, reduces EENS
-to 86.370\,kWh in every scenario; adding maximum
-feasible replenishment reduces it further to
-0.019, 2.517, 9.891 and 51.745\,kWh under
-Normal, Delayed, Monsoon and Extreme logistics,
-respectively.
 
-The two no-replenishment reference controllers
-are scenario-invariant; allowing greedy diesel
-dispatch reduces mean EENS by 136.562\,kWh
-per episode in every scenario.
+\end{revisedblock}
 
-Masked-random joint actions instead yield
-111.695--116.605\,kWh across these scenarios,
-illustrating the importance of dispatch discipline
-when interpreting random baselines.
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\caption{\revised{Reliability decomposition across
+the supplementary reference controllers. Mean EENS
+(kWh per 360-hour episode) across ten sites.
+Lower values indicate fewer unserved kWh.
+Sequential contrasts are descriptive rather than
+isolated causal effects of learning.}}
+\label{tab:null_reliability_decomposition}
+\begin{tabular}{p{5cm}rrrr}
+\toprule
+\revised{\textbf{Controller}} &
+\revised{\textbf{Normal}} &
+\revised{\textbf{Delayed}} &
+\revised{\textbf{Monsoon}} &
+\revised{\textbf{Extreme}} \\
+\midrule
+\revised{No DG, no orders} &
+\revised{222.932} & \revised{222.932} &
+\revised{222.932} & \revised{222.932} \\
+\revised{Greedy DG, never order} &
+\revised{86.370} & \revised{86.370} &
+\revised{86.370} & \revised{86.370} \\
+\revised{Greedy DG, always-order-max} &
+\revised{0.019} & \revised{2.517} &
+\revised{9.891} & \revised{51.745} \\
+\revised{RLInv} &
+\revised{0.019} & \revised{3.599} &
+\revised{11.287} & \revised{53.854} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-
+\begin{revisedblock}
+Table~\ref{tab:null_reliability_decomposition}
+makes the sequential comparison explicit. Without
+replenishment, greedy diesel dispatch reduces
+ten-site mean EENS by 136.562\,kWh per episode
+in all four logistics scenarios. These no-order
+reference controllers are scenario-invariant.
+Maximum feasible replenishment further reduces
+EENS, although these descriptive contrasts do
+not isolate a causal contribution of reinforcement
+learning. Masked-random joint actions instead yield
+111.695--116.605\,kWh across the four scenarios.
 For the evaluated deterministic-grid configuration, the fixed
 PV--grid--battery dispatch priority produces a site-specific residual
 $R_i$ satisfying, to numerical precision,
@@ -1832,6 +1856,23 @@ classical seed blocks index evaluation randomness, not learned models.}}
 \end{tabular}
 \end{table}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.94\textwidth]
+{fig_g5b_shared_b1_operating_points.png}
+\caption{\revised{Mean EENS versus accepted order
+frequency for source-calibrated classical policies
+and shared RLInv on the five held-out sites.
+Results cover three evaluation seed blocks and
+ten episodes per block. Each panel represents
+one logistics scenario; vertical scales differ
+to show within-scenario contrasts. Order count
+is not fuel volume or procurement cost. The
+points are descriptive comparisons, not a
+globally established economic Pareto frontier.}}
+\label{fig:g5b_shared_b1_operating_points}
+\end{figure}
+
 \begin{revisedblock}
 Table~\ref{tab:g5b_shared_b1_fairness} shows that both shared
 RLInv and B1-Shared-HighBuffer achieve zero mean EENS under Normal
@@ -1845,10 +1886,14 @@ their Extreme means are 3.819 and 0.339\,kWh, respectively.
 Thus, the small pooled contrasts conceal site-level trade-offs.
 
 The source-only classical calibration substantially strengthens the
-baseline challenge to the learned shared controller. The defensible
-result is a scenario-dependent reliability-versus-order-frequency
-frontier, not general superiority of RLInv or equivalence of the
-policies. A matched episode count of 600 per controller does not create
+baseline challenge to the learned shared controller. 
+The defensible result is a scenario-dependent
+reliability--order-frequency trade-off among the
+evaluated controllers, as illustrated in
+Figure~\ref{fig:g5b_shared_b1_operating_points},
+rather than general superiority of RLInv or
+equivalence of the policies.
+ A matched episode count of 600 per controller does not create
 600 independent learned-policy replicates; only three independent
 shared RLInv policies were trained, and all five held-out site
 outcomes are nested within them. The additional comparison should
