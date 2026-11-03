@@ -101,13 +101,33 @@ performance.
 \end{revisedblock}
 
 
-The comparison with Oracle-MPC, on paired (site, seed) comparisons
-($n{=}100$), indicates a real difference under normal, delayed, and
-monsoon conditions: mean paired differences of 3.15, 9.67, and
-11.91\,kWh respectively, with 95\% confidence intervals excluding zero
-in all three cases. Under extreme conditions the paired difference is
-directionally consistent but the interval spans zero (3.60\,kWh, 95\%
-CI $[-0.18, 7.38]$). 
+\revised{The original RLInv--Oracle-MPC comparison used
+100 site--seed pairs (ten sites and ten seeds).
+Reanalysing the archived results using each site's mean
+paired difference as the statistical unit yields the same
+mean Oracle-MPC-minus-RLInv EENS differences of
+3.15, 9.67, 11.91 and 3.60\,kWh under Normal, Delayed,
+Monsoon and Extreme logistics, respectively.
+
+The site-level 95\% confidence intervals are
+$[-0.83,\,7.14]$, $[-2.53,\,21.86]$,
+$[-2.99,\,26.82]$ and $[-0.62,\,7.81]$\,kWh,
+respectively (paired $t$ intervals, $n=10$ sites).
+All four intervals include zero. The corresponding
+two-sided $p$-values are 0.107, 0.107, 0.104
+and 0.086, with a Holm-adjusted $p$-value of
+0.342 for each comparison across the four scenarios.
+
+Thus, RLInv retains its numerical EENS advantage
+over Oracle-MPC in all four scenarios, but none
+of the differences is statistically significant
+at the site level. The original site--seed
+confidence intervals used $n=100$ observations
+without adjustment for clustering within sites.
+The site-level reanalysis is used for
+cross-site statistical inference.}
+
+
 \begin{revisedblock}
 The difference is largest under Monsoon logistics
 and narrows under Extreme conditions, where prolonged
@@ -198,6 +218,7 @@ experimental framework.
 
 
 
+
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{fig_eens_comparison_v4.png}
@@ -211,12 +232,15 @@ across delivery scenarios. Policies, left to right:
 \revised{(perfect-information dispatch reference;
 diesel delivery remains stochastic)},
 and \textbf{RLInv} (the proposed joint policy).
-Error bars show 95\% confidence intervals over
-$n=100$ (10 sites $\times$ 10 seeds).}
+\revised{Error bars show the original 95\%
+confidence intervals calculated from 100
+site--seed observations (10 sites $\times$ 10 seeds).
+For the RLInv--Oracle-MPC comparison,
+the site-level confidence intervals reported
+in the text are used for cross-site
+statistical inference.}}
 \label{fig:eens_comparison}
 \end{figure}
-
-
 
 \subsection{Performance across sites with different operating characteristics}
 \label{sec:site_breakdown}
