@@ -990,7 +990,10 @@ they do not establish lower total operating cost or statistical
 superiority, since accepted orders do not measure fuel quantity,
 procurement expenditure or inventory-holding cost.
 
-The other reference controllers clarify the source of reliability.
+The no-order reference controllers are
+logistics-scenario invariant; introducing greedy
+diesel dispatch reduces their mean EENS by
+136.562\,kWh per episode in every scenario. The other reference controllers clarify the source of reliability.
 No-DG/no-order yields 222.932\,kWh mean EENS and no diesel supply.
 Allowing greedy diesel dispatch from initial inventory, without
 replenishment, reduces EENS to 86.370\,kWh in every scenario; adding
@@ -1020,17 +1023,29 @@ reward. The fixed-residual identity does not, by itself, establish
 which replenishment policy is globally optimal; stockout, constraint
 and temporal effects also matter.
 
+
+A supplementary post-hoc comparison using the
+implemented reward function, normalised by each
+site's mean hourly load, ranked RLInv tied third
+under Normal logistics, sixth under Delayed,
+seventh under Monsoon, and sixth under Extreme
+logistics among twenty evaluated controller
+configurations. Always-order-max achieved the
+highest observed score in all four scenarios.
+
 Relative to the no-DG/no-order reference and the
-best observed controller among the twenty evaluated
-policies, RLInv captures approximately 100.0\%,
-99.5\%, 99.4\%, and 98.9\% of the observed
-reward-improvement range under Normal, Delayed,
-Monsoon, and Extreme logistics, respectively.
-These results indicate that RLInv captures nearly
-all of the measured improvement over the reference
-controller, while the remaining differences between
-competent controllers occupy a narrow band of the
-observed reward range.
+highest-scoring evaluated controller, RLInv
+captured approximately 100.0\%, 99.5\%, 99.4\%,
+and 98.9\% of the observed reward-improvement
+range under Normal, Delayed, Monsoon, and
+Extreme logistics, respectively. Thus, RLInv
+achieved nearly all of the measured improvement
+over the reference controller, while its remaining
+performance gap was small relative to the overall
+observed reward range. These rankings are
+empirical and do not establish global optimality
+or identify the cause of the remaining gap.
+
 
 The diagnostic is post-hoc, and evaluation seed blocks do not provide
 independently trained null policies. Its conclusion is therefore
