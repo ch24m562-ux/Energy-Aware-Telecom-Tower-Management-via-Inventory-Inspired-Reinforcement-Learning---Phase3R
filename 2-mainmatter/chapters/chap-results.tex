@@ -7,24 +7,25 @@
 \label{sec:results_overview}
 % ============================================================
 
-This chapter answers three questions: does RLInv provide measurable
-operational advantages over existing rule-based and optimisation-based
-approaches, under which delivery-logistics conditions do those
-advantages emerge, and which design choices are responsible? It also
-examines how far these conclusions hold under different reward, sizing,
-and delivery-time assumptions. Evidence
-is drawn from the full Phase 3 evaluation grid (10 sites, 10 seeds,
-four delivery-logistics scenarios), reported primarily as Expected
-Energy Not Served (EENS), with the site, scenario, and metric
-definitions given in Chapter~\ref{chap:methodology}.
 
-\revised{The original primary evaluation uses ten
-training seeds. The supplementary four-algorithm
-comparison uses five seeds, while the cross-site
-generalisation and adaptation experiments use
-three seeds. These evaluations are reported
-separately because their experimental
-populations differ.}
+\begin{revisedblock}
+This chapter evaluates the proposed inventory-aware
+reinforcement learning controller (RLInv) against
+rule-based, optimisation-based, and reinforcement learning
+alternatives. The original comparisons and ablation
+studies establish the initial experimental findings,
+while the extended evaluation examines calibrated
+classical baselines, alternative RL algorithms,
+computational cost, and cross-site generalisation.
+Supplementary reference controllers further examine
+the relative contributions of diesel dispatch and
+replenishment to reliability. The original evaluation
+uses ten training seeds, the four-algorithm comparison
+uses five, and the cross-site generalisation experiments
+use three. Results from these studies are interpreted
+separately because their experimental populations differ.
+\end{revisedblock}
+
 
 % ============================================================
 \section{Primary Comparison}
@@ -77,22 +78,23 @@ TrackB ($(s,S)$ + learned dispatch) & 1.28 & 3.65 & 174.50 & 152.13 \\
 \end{tabular}
 \end{table}
 
-\revised{Within the original-configuration policy set in
-Table~\ref{tab:primary_comparison}, RLInv records the lowest
-mean EENS under all four delivery-logistics scenarios.
-That table excludes the separately calibrated B1*
-variants in Subsection~\ref{sec:calibrated_baselines};
-B1*-HighBuffer records lower numerical mean EENS
-than RLInv in three stressed scenarios.} Under normal
-logistics, most policies perform adequately, but the advantage of
-RLInv widens substantially as delivery uncertainty increases: relative to the original fixed-threshold B1 baseline, RLInv reduces EENS by 73\%
-under delayed logistics, 51\% under monsoon conditions, and 7\% under
-extreme logistics stress. The narrowing margin under the most severe
-scenario is itself informative: under a mean 336-hour delivery lead
-time, the achievable planning horizon for \emph{any} policy is bounded
-by physical fuel availability, and the residual advantage reflects
-RLInv's more efficient scheduling of a scarce resource rather than a
-qualitatively different capability (see Section~\ref{sec:mechanism_h1}).
+
+\begin{revisedblock}
+Within the original comparison set, RLInv records the
+lowest mean EENS under all four delivery-logistics
+scenarios. Relative to the original fixed-threshold B1
+baseline, RLInv reduces EENS by 73\% under Delayed,
+51\% under Monsoon, and 7\% under Extreme logistics.
+The smaller difference under Extreme conditions is
+consistent with the increasing limitations imposed by
+prolonged fuel-delivery delays. These findings apply
+to the original baseline configurations; the
+subsequently calibrated classical baselines and
+supplementary reference controllers in
+Section~\ref{sec:calibrated_baselines} provide a
+broader assessment of comparative performance.
+\end{revisedblock}
+
 
 The comparison with Oracle-MPC, on paired (site, seed) comparisons
 ($n{=}100$), indicates a real difference under normal, delayed, and
@@ -100,21 +102,24 @@ monsoon conditions: mean paired differences of 3.15, 9.67, and
 11.91\,kWh respectively, with 95\% confidence intervals excluding zero
 in all three cases. Under extreme conditions the paired difference is
 directionally consistent but the interval spans zero (3.60\,kWh, 95\%
-CI $[-0.18, 7.38]$). This gap is largest under
-Monsoon but narrows again under Extreme, where physical fuel
-availability increasingly constrains all policies --- indicating that RLInv's
-benefit cannot be explained solely by improved forecasting or dispatch
-optimisation, since Oracle-MPC already has access to realised future
-load, solar generation, and grid availability for dispatch planning.
+CI $[-0.18, 7.38]$). The difference is largest under Monsoon logistics and narrows under Extreme conditions, where prolonged delivery delays increasingly constrain fuel availability. However, the MPC comparisons also involve differences in planning horizon, forecast assumptions, and replenishment policy. The observed differences therefore cannot be attributed uniquely to any one of these factors.
 
-This reliability advantage is not obtained through disproportionate
-diesel consumption: aggregated across all sites and scenarios, RLInv
-consumes 205.7\,kWh of diesel versus B1's 198.5\,kWh (approximately
-3.6\% more), a modest increase consistent with a genuine operational
-trade-off rather than an inflated or unfair comparison.
-Table~\ref{tab:secondary_metrics} shows that this modest increase is
-accompanied by a consistently larger inventory buffer and more proactive
-replenishment behaviour.
+
+\begin{revisedblock}
+Across all sites and scenarios, RLInv consumes
+205.7\,kWh of diesel energy compared with
+198.5\,kWh for B1, approximately 3.6\% more.
+In the evaluated deterministic-grid simulator,
+diesel generation and unserved energy partition
+the residual demand remaining after PV, grid,
+and battery dispatch. Consequently, lower EENS
+is accompanied by higher diesel energy supplied,
+and the comparison should not be interpreted as
+demonstrating superior fuel efficiency.
+Table~\ref{tab:secondary_metrics} additionally
+reports replenishment activity and inventory levels.
+\end{revisedblock}
+
 
 \begin{table}[htb]
 \centering
@@ -147,45 +152,39 @@ A6     & Extreme & 61.50  & 161.4 & 0.69 & 46.2 & 34.6 \\
 \end{tabular}
 \end{table}
 
-RLInv's ordering frequency and inventory buffer both decline
-monotonically as logistics stress increases (orders: 2.16 $\to$ 1.34;
-mean inventory: 78.8\% $\to$ 53.1\%, Normal to Extreme), consistent with
-proactive replenishment rather than reactive over-ordering under stress.
-TrackB's low diesel consumption under Monsoon and Extreme should not be
-interpreted as greater efficiency; instead, poor dispatch leaves more
-fuel unused while EENS increases substantially. Under Normal logistics,
-TrackB and A6 produce nearly identical outcomes because both share the
-same calibrated $(s,S)$ replenishment policy and dispatch decisions have
-little influence under low-stress conditions.
 
-Notably, the TrackB comparison shows that replacing rule-based dispatch with \emph{learned} dispatch
-while keeping classical $(s,S)$ ordering does not
-reproduce RLInv's advantage --- indeed it performs \emph{worse} than
-either rule-based baseline under monsoon and extreme conditions. This
-suggests that reinforcement learning alone, applied
-only to the dispatch decision, does not explain RLInv's performance.
+\begin{revisedblock}
+The original comparison shows that RLInv achieves
+lower mean EENS than the selected rule-based,
+optimisation-based, and dispatch-only learning
+configurations. Its accepted ordering frequency
+and mean inventory level decrease as delivery
+delays increase. TrackB performs particularly
+poorly under Monsoon and Extreme logistics,
+although differences in its dispatch configuration
+and observation design limit causal interpretation
+of this gap.
 
-MPC approximately optimises dispatch over a 24-hour receding horizon using the available forecast, yet still under-performs
-RLInv because its planning horizon ($H{=}24$\,h) cannot see far enough
-ahead to plan for delivery delays that can extend far beyond the
-24-hour planning horizon.
+These results demonstrate the importance of
+accounting for diesel replenishment alongside
+dispatch decisions, but do not establish that
+jointly learned control is superior to all
+classical inventory policies. The extended
+controller comparisons in
+Section~\ref{sec:calibrated_baselines}
+examine this distinction further. The following
+ablations assess the contribution of individual
+design choices within the original RLInv
+experimental framework.
+\end{revisedblock}
 
-\textbf{Improving dispatch alone --- whether through reinforcement
-learning or through optimisation --- does not eliminate the degradation
-caused by externally managed replenishment.} RLInv achieves the best
-overall performance in the evaluated grid (Figure~\ref{fig:eens_comparison}); the following ablations
-examine how much of that result can be attributed to joint replenishment
-learning and the other design choices. This motivates the mechanistic analysis in
-Section~\ref{sec:mechanism}, where the three pre-specified ablation
-studies investigate the individual contributions of coupled replenishment
-learning, action masking, and inventory-aware state representation.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{fig_eens_comparison_v4.png}
 \caption{Overall policy performance across delivery scenarios. Policies,
 left to right: \textbf{B0} (threshold dispatch, fixed uncalibrated
-threshold ordering), \textbf{B1} (threshold dispatch, ixed-threshold $(s,S)$
+threshold ordering), \textbf{B1} (threshold dispatch, fixed-threshold $(s,S)$
 ordering), \textbf{MPC} (model-predictive dispatch; planning horizon
 discussed in Chapter~\ref{chap:methodology}), \textbf{TrackB}
 ($(s,S)$ ordering with a separately learned dispatch policy),
@@ -219,7 +218,7 @@ of generalisation to unseen sites: each policy
 in this comparison was trained for its own site.
 Cross-site transfer without site-specific
 retraining is evaluated separately in
-Subsection~\ref{sec:cross_site_transfer}.
+Subsection~\ref{sec:g5b_zero_shot}.
 \end{revisedblock}
 
 \begin{figure}[htb]
@@ -233,30 +232,33 @@ Easy, orange = Medium, red = Hard).}
 \label{fig:site_breakdown}
 \end{figure}
 
+
 % ============================================================
-\section{Understanding Why RLInv Works}
+\section{\revised{Ablation Analysis of RLInv}}
 \label{sec:mechanism}
 % ============================================================
 
-The primary comparison establishes that RLInv consistently achieves
-the best overall performance. To understand which design choices
-contribute to this, three planned ablation comparisons examine the
-contributions of replenishment learning, action masking, and
-logistics-related observation channels (Chapter~\ref{chap:methodology}).
-Not every comparison changes only one implementation detail, so the
-limitations of each comparison are stated explicitly below. They are referred to here by what they test --- \textbf{joint
-replenishment and dispatch learning}, \textbf{action masking}, and
-\textbf{inventory observability} --- corresponding to the H1, H2, and
-H3 labels used in the methodology chapter and analysis scripts. All
-comparisons below are
-\emph{paired at the seed level}: the same 10 seeds are evaluated under
-every policy, so seed 42 under RLInv is matched against seed 42 under
-the comparator, not treated as an independent sample. Significance is
-therefore assessed with a paired $t$-test on the within-seed
-differences, with effect size Cohen's $d_z$ (mean paired difference /
-std of paired differences), following the corrected statistical
-methodology adopted after Phase 2 (an earlier, independent-samples test
-understated significance for this design).
+\begin{revisedblock}
+Three ablation comparisons examine the sensitivity
+of the original RLInv results to jointly learned
+replenishment and dispatch, action masking, and
+logistics-related observations, corresponding to
+hypotheses H1, H2, and H3 in the methodology chapter.
+Some comparisons also differ in dispatch action
+space, training initialisation, or observation design;
+therefore, the results are interpreted as comparisons
+between evaluated configurations rather than
+isolated causal effects.
+
+The analyses use the same ten training seeds as the
+original evaluation. Statistical comparisons are paired
+by training seed, with significance assessed using
+paired $t$-tests and effect sizes reported as
+Cohen's $d_z$. Evaluation episodes are not treated
+as independent training replicates.
+\end{revisedblock}
+
+
 
 \subsection{Joint replenishment and dispatch learning}
 \label{sec:mechanism_h1}
@@ -888,6 +890,120 @@ selection as important drivers of reliability under
 uncertain diesel delivery. They also place a clear
 boundary on the measured incremental advantage of
 jointly learned ordering and dispatch.
+\end{revisedblock}
+
+\subsection[Supplementary Null-Controller Diagnostic]
+{\revised{Supplementary Null-Controller Diagnostic}}
+\label{sec:null_controller_diagnostic}
+
+\begin{revisedblock}
+To test whether improvements in reliability require a learned
+replenishment policy, a supplementary, post-hoc comparison evaluated
+five simple reference controllers under the frozen held-out protocol:
+(1) uniformly random feasible joint actions (masked-random),
+(2) random feasible ordering with diesel generation requested whenever
+feasible (random-order), (3) no replenishment with greedy diesel
+dispatch (never-order), (4) the largest currently feasible discrete
+replenishment action with greedy diesel dispatch (always-order-max), and
+(5) no generator dispatch or replenishment (no-DG/no-order).
+The fourth controller uses the existing small/large order classes;
+it does not continuously fill the tank. All five use the same physical
+safety rules as the original simulator.
+
+The comparison comprises ten sites, four logistics scenarios, ten
+evaluation seed blocks and ten 360-hour episodes per seed block,
+producing 20,000 controller episodes. These are evaluation seeds,
+not independently trained models. The initial-inventory draws are
+matched across the new controllers and archived RLInv evaluations.
+The historical B1 snapshot replay and episode-level energy-conservation
+checks passed. These exploratory results supplement, but do not
+replace, the pre-existing algorithm and calibrated-baseline evaluations.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\caption{\revised{Supplementary null-controller comparison with RLInv
+and calibrated B1*-HighBuffer. Ten-site means per 360-hour held-out
+episode, 10 evaluation seed blocks and 10 episodes per block.
+Diesel denotes generated energy, and orders are accepted positive
+replenishment orders; lower EENS is better, but order count is not
+procurement cost. The comparison is descriptive and post-hoc.}}
+\label{tab:null_controller_comparison}
+\begin{tabular}{llrrr}
+\toprule
+\textbf{Scenario} & \textbf{Controller} & \textbf{EENS (kWh)} & \textbf{Diesel (kWh)} & \textbf{Orders} \\
+\midrule
+\revised{Normal}  & \revised{RLInv}               & \revised{0.019} & \revised{222.913} & \revised{2.164} \\
+ & \revised{B1*-HighBuffer}       & \revised{0.063} & \revised{222.869} & \revised{1.998} \\
+ & \revised{Random-order}          & \revised{0.019} & \revised{222.913} & \revised{2.148} \\
+ & \revised{Always-order-max}      & \revised{0.019} & \revised{222.913} & \revised{2.092} \\
+\midrule
+\revised{Delayed} & \revised{RLInv}              & \revised{3.599} & \revised{219.333} & \revised{2.106} \\
+ & \revised{B1*-HighBuffer}       & \revised{3.395} & \revised{219.537} & \revised{1.954} \\
+ & \revised{Random-order}          & \revised{2.802} & \revised{220.130} & \revised{2.105} \\
+ & \revised{Always-order-max}      & \revised{2.517} & \revised{220.415} & \revised{2.041} \\
+\midrule
+\revised{Monsoon} & \revised{RLInv}              & \revised{11.287} & \revised{211.645} & \revised{1.970} \\
+ & \revised{B1*-HighBuffer}       & \revised{11.282} & \revised{211.650} & \revised{1.829} \\
+ & \revised{Random-order}          & \revised{10.566} & \revised{212.366} & \revised{1.966} \\
+ & \revised{Always-order-max}      & \revised{9.891}  & \revised{213.041} & \revised{1.911} \\
+\midrule
+\revised{Extreme} & \revised{RLInv}              & \revised{53.854} & \revised{169.077} & \revised{1.341} \\
+ & \revised{B1*-HighBuffer}       & \revised{53.164} & \revised{169.768} & \revised{1.252} \\
+ & \revised{Random-order}          & \revised{53.261} & \revised{169.671} & \revised{1.345} \\
+ & \revised{Always-order-max}      & \revised{51.745} & \revised{171.187} & \revised{1.321} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{revisedblock}
+Table~\ref{tab:null_controller_comparison} shows that
+always-order-max has the lowest or tied-lowest ten-site mean EENS
+among these four policies in every scenario, while placing slightly
+fewer accepted orders than RLInv. Random feasible ordering with
+greedy diesel dispatch also matches or improves upon RLInv's mean
+EENS. These observations qualify the earlier RLInv superiority claim;
+they do not establish lower total operating cost or statistical
+superiority, since accepted orders do not measure fuel quantity,
+procurement expenditure or inventory-holding cost.
+
+The other reference controllers clarify the source of reliability.
+No-DG/no-order yields 222.932\,kWh mean EENS and no diesel supply.
+Allowing greedy diesel dispatch from initial inventory, without
+replenishment, reduces EENS to 86.370\,kWh in every scenario; adding
+maximum feasible replenishment reduces it further to 0.019, 2.517,
+9.891 and 51.745\,kWh under Normal, Delayed, Monsoon and Extreme
+logistics, respectively. Masked-random joint actions instead yield
+111.695--116.605\,kWh across these scenarios, illustrating the
+importance of dispatch discipline when interpreting random baselines.
+
+For the evaluated deterministic-grid configuration, the fixed
+PV--grid--battery dispatch priority produces a site-specific residual
+$R_i$ satisfying, to numerical precision,
+\begin{equation}
+  \mathrm{EENS}_i + E_{\mathrm{diesel},i} = R_i.
+  \label{eq:null_fixed_residual}
+\end{equation}
+The equal-site mean of $R_i$ is 222.932\,kWh per 360-hour episode.
+Thus, lower EENS necessarily corresponds to greater diesel energy
+supplied within this evaluation; the two measures must not be treated
+as independent performance gains. Substituting
+$U_t=R_t-D_t$ into the implemented per-step reward, with
+$\alpha=1$ and $\lambda=100$, gives its energy-dependent component
+as $(99D_t-100R_t-0.4G_t)/\bar d$. This strongly favours using
+available diesel to avoid unmet load, whereas explicit fuel-order,
+ordered-volume and holding costs are absent from the implemented
+reward. The fixed-residual identity does not, by itself, establish
+which replenishment policy is globally optimal; stockout, constraint
+and temporal effects also matter.
+
+The diagnostic is post-hoc, and evaluation seed blocks do not provide
+independently trained null policies. Its conclusion is therefore
+limited but clear: under the implemented simulator and reward,
+RLInv did not demonstrate an incremental mean-EENS or accepted-order
+advantage over a simple greedy-dispatch, feasible-replenishment rule.
 \end{revisedblock}
 
 \subsection[Comparison of Reinforcement Learning Algorithms]
@@ -1773,35 +1889,9 @@ not a demonstrated scalable multi-tower deployment system.
 \label{sec:results_summary}
 % ============================================================
 \begin{sloppypar}
-Within the original policy and ablation comparisons,
-RLInv records the lowest mean EENS under Normal and
-Extreme logistics, is statistically indistinguishable
-from the closest comparator under Delayed logistics,
-and is numerically outperformed by A6 under Monsoon
-logistics.
+The original evaluation showed that RLInv reduced Expected Energy Not Served (EENS) relative to the initial rule-based and optimisation-based baselines under the tested configurations. The expanded baseline study qualifies this result: calibrated B1*-HighBuffer approaches or improves on RLInv under stressed logistics, while a supplementary greedy-dispatch controller with feasible maximum replenishment achieves lower or tied mean EENS with slightly fewer accepted orders. These findings demonstrate the importance of replenishment but do not establish an incremental reliability or order-count advantage for the tested RLInv policy over the strongest simple reference controller. Under the evaluated fixed dispatch priority, EENS and diesel generation satisfy a site-specific conservation relationship, which is important when interpreting reliability and fuel-consumption results.
 
-However, the expanded calibrated-classical comparison
-shows that B1*-HighBuffer achieves lower mean EENS
-than RLInv under Delayed, Monsoon, and Extreme logistics,
-while RLInv retains the lower mean under Normal logistics.
-B1*-HighBuffer also places fewer orders than RLInv
-across all four scenarios.
+The comparative RL study found broadly similar EENS across RLInv, unmasked PPO, DQN and A2C, with no statistically significant paired differences after multiplicity correction, although their ordering behaviour differed substantially. Computational evaluation demonstrated millisecond-scale local decision times. The shared-policy experiment required approximately one-fifth of the nominal source-site training interactions of five separately trained policies and achieved generally comparable, but not uniformly superior, reliability on five held-out sites. Limited target-site fine-tuning did not consistently improve EENS relative to the shared parent policy.
 
-These findings demonstrate that careful calibration
-of classical inventory-ordering thresholds can match
-or outperform the proposed reinforcement learning
-controller under stressed delivery conditions. The ablations provide a
-more qualified explanation than the primary comparison alone. The
-additional benefit of jointly learned replenishment is
-scenario-dependent, appearing under Normal and Extreme conditions but
-not under Delayed or Monsoon logistics. The cleaner RLInv--A7
-comparison finds no statistically distinguishable mean-EENS effect
-from action masking when replenishment is jointly learned, while the
-larger A6--TrackB gap under stressed logistics is confounded by
-differences in observation design. Removing the five logistics-related
-observation channels produces only small, non-significant changes.
-Reward, tank-capacity, and delivery-distribution analyses further
-clarify the conditions under which RLInv's advantage persists, while
-the stochastic-grid experiment and RLInv-DA extension identify
-limitations rather than universal improvements.
+Overall, the experiments establish the operational relevance of diesel inventory and replenishment decisions while identifying limitations in the measured incremental benefit of reinforcement learning under the implemented simulator and reward formulation. The results motivate future investigation of explicit replenishment economics and richer sequential control decisions, with comparison against appropriately calibrated classical alternatives.
 \end{sloppypar}
