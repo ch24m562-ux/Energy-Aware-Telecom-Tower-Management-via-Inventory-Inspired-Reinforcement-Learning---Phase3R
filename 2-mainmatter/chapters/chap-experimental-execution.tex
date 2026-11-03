@@ -258,9 +258,11 @@ every site, rather than scenario coverage being policy-specific.
 
 \subsection{Initial inventory randomisation}
 
-Training episodes randomise initial inventory over
-$[0.20,\,0.90]\,C^{\Tank}$, so that the policy learns to manage from any
-starting level rather than a single fixed condition. Evaluation episodes
+\revised{RLInv training episodes randomise initial
+inventory over $[0.20,\,0.90]\,C^{\Tank}$.
+In the supplementary four-algorithm comparison,
+A7, DQN, and A2C instead use a fixed initial
+inventory of $0.60\,C^{\Tank}$.} Evaluation episodes
 randomise initial inventory over the narrower range
 $[0.3,\,0.9]\,C^{\Tank}$, testing the policy across a realistic range of
 deployment starting conditions.
@@ -291,7 +293,9 @@ EENS (kWh)      & Expected Energy Not Served per episode: $\sum_t U_t$
                 & Primary reliability metric \\[4pt]
 Diesel consumption (kWh) & Total DG energy dispatched per episode
                 & Proxy for fuel cost and carbon emissions \\[4pt]
-Stockout events & Hours with $\Inv_t = 0$ and $G_t = 0$
+Stockout events &
+Hours with unmet energy $U_t > 0$ and
+exhausted pre-delivery inventory
                 & Hard reliability failures \\[4pt]
 Mean inventory (\%) & Mean $\Inv_t / C^{\Tank}$ per episode
                 & Characterises ordering behaviour \\[4pt]
