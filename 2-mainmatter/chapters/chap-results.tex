@@ -197,26 +197,26 @@ experimental framework.
 \end{revisedblock}
 
 
+
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{fig_eens_comparison_v4.png}
-\caption{Performance of the original comparison policies across delivery scenarios. Policies,
-left to right: \textbf{B0} (threshold dispatch, fixed uncalibrated
-threshold ordering), \textbf{B1} (threshold dispatch, fixed-threshold $(s,S)$
-ordering), \textbf{MPC} (model-predictive dispatch; planning horizon
-discussed in Chapter~\ref{chap:methodology}), \textbf{TrackB}
-($(s,S)$ ordering with a separately learned dispatch policy),
-\textbf{Oracle-MPC} (dispatch with perfect future load, solar and grid
-information; 
-\revised{a perfect-information dispatch reference,
-not a global performance bound or deployable policy;
-diesel delivery remains stochastic}
-, not a
-deployable policy; diesel delivery remains stochastic), and \textbf{RLInv} (the proposed joint
-policy). Error bars show 95\% confidence intervals over $n=100$
-(10 sites $\times$ 10 seeds).}
+\caption{Performance of the original comparison policies
+across delivery scenarios. Policies, left to right:
+\textbf{B0} (threshold dispatch, fixed ordering),
+\textbf{B1} (fixed-threshold $(s,S)$ ordering),
+\textbf{MPC} (model-predictive dispatch),
+\textbf{TrackB} ($(s,S)$ ordering with learned dispatch),
+\textbf{Oracle-MPC}
+\revised{(perfect-information dispatch reference;
+diesel delivery remains stochastic)},
+and \textbf{RLInv} (the proposed joint policy).
+Error bars show 95\% confidence intervals over
+$n=100$ (10 sites $\times$ 10 seeds).}
 \label{fig:eens_comparison}
 \end{figure}
+
+
 
 \subsection{Performance across sites with different operating characteristics}
 \label{sec:site_breakdown}
@@ -304,16 +304,17 @@ pattern holds when restricted to the selected three-site sensitivity
 subset (site2, site5, and site7), so
 this is not an artefact of averaging across easier sites.
 
-\textbf{Interpretation.} The additional benefit attributable to
-jointly learned replenishment was observed under Normal and Extreme
-logistics, but not under Delayed or Monsoon conditions. Diagnostic
-inspection (constraint violations, stockout events,
-diesel usage; Section~\ref{sec:behaviour}) shows zero hard violations
-for both policies throughout, so the Normal/Extreme difference is not
-explained by infeasible or erratic actions; it is consistent with
-RLInv's ability to anticipate that its own dispatch decisions can
-deplete inventory ahead of a delayed delivery, a benefit that is not
-uniformly present across every logistics regime tested.
+
+\revised{\textbf{Interpretation.}
+The RLInv--A6 comparison shows lower RLInv
+EENS under Normal and Extreme logistics,
+with no statistically distinguishable
+difference under Delayed or Monsoon conditions.
+Both controllers recorded zero hard violations.
+Because their dispatch action spaces also
+differ, this experiment does not isolate
+the causal effect of learned replenishment.}
+
 
 For context, RLInv also differs from TrackB (classical $(s,S)$
 ordering paired with a \emph{separately trained} dispatch policy, a
@@ -357,20 +358,19 @@ initial-inventory training distribution)
 shows no significant difference in any scenario
 ($|d_z|\leq 0.37$ throughout).
 
-\textbf{Interpretation.} The A6--TrackB result is consistent with an
-architecture-dependent robustness difference under stressed logistics,
-but cannot be attributed to masking alone because the observation
-designs also differ; the resulting gap is also confounded with
-whether ordering is jointly learned, since RLInv and TrackB differ in
-that respect too. The defensible claim is that masking is associated
-with a substantial part of the RLInv--TrackB gap under Monsoon/Extreme,
-not all of it. The RLInv--A7 comparison shows no statistically
-significant mean-EENS difference, but does not
-isolate masking because the historical
-training-inventory distributions differed. Both A6 and TrackB record zero explicit hard constraint
-violations, so the A6--TrackB effect is not about constraint
-enforcement \emph{per se}. These comparisons do not establish a general
-independent mean-EENS benefit from masking.
+
+\textbf{Interpretation.}
+A6 achieved lower EENS than TrackB under
+Monsoon and Extreme logistics. The comparison
+changes both action masking and observation
+design, so the measured difference cannot
+be assigned to masking alone. The separate
+RLInv--A7 comparison found no statistically
+significant mean-EENS difference, although
+the historical training-inventory distributions
+also differed. Both A6 and TrackB recorded
+zero hard constraint violations.
+
 
 \begin{figure}[htb]
 \centering
@@ -398,16 +398,16 @@ statistical significance under the final evaluation protocol
 ($|d_z|$ ranging 0.24--0.69; closest to significance under Extreme,
 $p=0.058$, still not significant at $\alpha=0.05$) (Figure~\ref{fig:ablation_h3}).
 
-\textbf{Interpretation.} Inventory observability produced consistently
-lower mean EENS, but the differences remained small and were not
-statistically distinguishable under the final evaluation protocol. This
-is reported as a genuine finding rather than omitted, since it
-clarifies which state information the learned policy actually exploits
---- the agent appears able to infer much of the required information
-indirectly from other observable variables (battery state-of-charge,
-grid availability, load, solar generation, and time-of-day information).
-The combined contribution of the removed logistics-related channels
-appears modest under the final evaluation protocol.
+
+\textbf{Interpretation.}
+Removing the five logistics-related observation
+channels increased mean EENS numerically
+across all four scenarios. None of the paired
+differences reached statistical significance.
+Because the channels were removed together,
+the experiment does not establish their
+individual contributions.
+
 
 \begin{figure}[htb]
 \centering
