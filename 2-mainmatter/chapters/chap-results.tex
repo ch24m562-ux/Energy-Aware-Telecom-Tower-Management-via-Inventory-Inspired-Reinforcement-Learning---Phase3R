@@ -993,15 +993,28 @@ procurement expenditure or inventory-holding cost.
 The no-order reference controllers are
 logistics-scenario invariant; introducing greedy
 diesel dispatch reduces their mean EENS by
-136.562\,kWh per episode in every scenario. The other reference controllers clarify the source of reliability.
-No-DG/no-order yields 222.932\,kWh mean EENS and no diesel supply.
-Allowing greedy diesel dispatch from initial inventory, without
-replenishment, reduces EENS to 86.370\,kWh in every scenario; adding
-maximum feasible replenishment reduces it further to 0.019, 2.517,
-9.891 and 51.745\,kWh under Normal, Delayed, Monsoon and Extreme
-logistics, respectively. Masked-random joint actions instead yield
-111.695--116.605\,kWh across these scenarios, illustrating the
-importance of dispatch discipline when interpreting random baselines.
+136.562\,kWh per episode in every scenario. 
+The other reference controllers clarify the source
+of reliability. No-DG/no-order yields
+222.932\,kWh mean EENS and no diesel supply.
+Allowing greedy diesel dispatch from initial
+inventory, without replenishment, reduces EENS
+to 86.370\,kWh in every scenario; adding maximum
+feasible replenishment reduces it further to
+0.019, 2.517, 9.891 and 51.745\,kWh under
+Normal, Delayed, Monsoon and Extreme logistics,
+respectively.
+
+The two no-replenishment reference controllers
+are scenario-invariant; allowing greedy diesel
+dispatch reduces mean EENS by 136.562\,kWh
+per episode in every scenario.
+
+Masked-random joint actions instead yield
+111.695--116.605\,kWh across these scenarios,
+illustrating the importance of dispatch discipline
+when interpreting random baselines.
+
 
 For the evaluated deterministic-grid configuration, the fixed
 PV--grid--battery dispatch priority produces a site-specific residual
@@ -1910,7 +1923,28 @@ are reported separately; the combined row is descriptive only.}}
 \bottomrule
 \end{tabular}
 \end{table}
-
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]
+{fig_g5b_scratch50_seed_spread.png}
+\caption{\revised{Scratch50 training-seed variability
+for policies trained on site5, evaluated on the
+held-out days 46--60 window under the four
+delivery-logistics scenarios. Each point represents
+mean EENS over ten evaluation episodes for one
+independently trained seed. The original three
+seeds and ten additional seeds are distinguished.
+Solid horizontal lines show the descriptive mean
+across all 13 seeds, and dashed horizontal lines
+show the corresponding median. Seed 1008 is the
+same policy in all four panels and is the highest
+point in each, indicating a consistently poor fit
+rather than a scenario-specific outlier. Under
+Extreme logistics, unlike the other scenarios,
+the seed distribution does not include a near-zero
+regime.}}
+\label{fig:g5b_scratch50_seed_spread}
+\end{figure}
 \begin{revisedblock}
 The combined scalability evidence therefore has five boundaries.
 First, measured CPU decision latencies describe local policy calls,
