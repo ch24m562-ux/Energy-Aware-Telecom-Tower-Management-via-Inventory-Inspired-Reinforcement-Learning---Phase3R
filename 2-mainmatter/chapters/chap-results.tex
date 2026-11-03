@@ -260,16 +260,17 @@ Easy, orange = Medium, red = Hard).}
 % ============================================================
 
 \begin{revisedblock}
-Three ablation comparisons examine the sensitivity
-of the original RLInv results to jointly learned
-replenishment and dispatch, action masking, and
-logistics-related observations, corresponding to
-hypotheses H1, H2, and H3 in the methodology chapter.
-Some comparisons also differ in dispatch action
-space, training initialisation, or observation design;
-therefore, the results are interpreted as comparisons
-between evaluated configurations rather than
-isolated causal effects.
+
+Three ablations assess the sensitivity of RLInv
+to joint replenishment and dispatch, action
+masking, and logistics observations. They
+correspond to hypotheses H1, H2, and H3 in
+Chapter~\ref{chap:methodology}. Some controller
+variants also differ in their action space,
+training initialisation, or observation design.
+These are therefore configuration comparisons,
+not isolated tests of individual causal effects.
+
 
 The analyses use the same ten training seeds as the
 original evaluation. Statistical comparisons are paired
@@ -1040,9 +1041,13 @@ EENS, although these descriptive contrasts do
 not isolate a causal contribution of reinforcement
 learning. Masked-random joint actions instead yield
 111.695--116.605\,kWh across the four scenarios.
-For the evaluated deterministic-grid configuration, the fixed
-PV--grid--battery dispatch priority produces a site-specific residual
-$R_i$ satisfying, to numerical precision,
+
+For the deterministic-grid evaluation, PV,
+grid, and battery follow a fixed dispatch
+priority. This defines a site-specific
+residual $R_i$ satisfying, to numerical
+precision,
+
 \begin{equation}
   \mathrm{EENS}_i + E_{\mathrm{diesel},i} = R_i.
   \label{eq:null_fixed_residual}
@@ -1273,16 +1278,19 @@ positive accepted orders, not an additional outcome.}}
 \end{table}
 
 \begin{revisedblock}
-The trace-level ordering diagnostic in
-Tables~\ref{tab:g4_order_quantity_subset} and
-\ref{tab:g4_order_waterfall} explains the different
-replenishment patterns. Under Normal logistics, all
-four controllers consume approximately 194.2\,kWh of
-diesel energy per episode and have near-identical EENS.
-RLInv accepts 2.114 orders per episode with a mean size
-of 137.385\,kWh, against 8.517--9.091 smaller orders
-for the unmasked controllers. RLInv also holds less
-inventory on average.
+
+Tables~\ref{tab:g4_order_quantity_subset}
+and~\ref{tab:g4_order_waterfall} show that,
+under Normal logistics, all four controllers
+use approximately 194.2\,kWh of diesel energy
+per episode and have similar EENS.
+
+RLInv accepts 2.114 orders per episode,
+averaging 137.385\,kWh per order. The
+unmasked controllers accept 8.517--9.091
+smaller orders per episode. RLInv also
+maintains lower mean inventory.
+
 
 Of A7's 81,747 attempted order actions, 50,586 were
 blocked while a delivery was pending and 28,163 were
