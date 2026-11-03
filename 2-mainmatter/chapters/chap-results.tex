@@ -48,13 +48,15 @@ dispatch policy, and is included to examine a distinct question from
 the other three: whether reinforcement learning \emph{alone}, applied
 only to dispatch, is sufficient, or whether the reliability gains
 reported below require learning ordering and dispatch \emph{jointly}.
-An oracle variant of MPC, given perfect foresight of load, solar
-generation, and grid availability, is included as an optimistic reference representing the
-best achievable dispatch performance within the decomposition
-framework under perfect future information (diesel delivery timing remains
-stochastic and governed by the same classical ordering rule as the
-other MPC variants); it is not intended as a
-deployable policy and is not counted among the competing baselines.
+
+\revised{An Oracle-MPC variant with perfect knowledge
+of future load, solar generation, and grid
+availability is included as a perfect-information
+dispatch reference. Diesel delivery remains stochastic,
+and replenishment follows the same classical ordering
+rule as the other MPC variants. It is neither a
+deployable controller nor a global performance bound.}
+
 
 \begin{table}[htb]
 \centering
@@ -87,12 +89,15 @@ baseline, RLInv reduces EENS by 73\% under Delayed,
 51\% under Monsoon, and 7\% under Extreme logistics.
 The smaller difference under Extreme conditions is
 consistent with the increasing limitations imposed by
-prolonged fuel-delivery delays. These findings apply
+prolonged fuel-delivery delays. 
+These findings apply
 to the original baseline configurations; the
 subsequently calibrated classical baselines and
 supplementary reference controllers in
-Section~\ref{sec:calibrated_baselines} provide a
-broader assessment of comparative performance.
+Subsections~\ref{sec:calibrated_baselines}
+and~\ref{sec:null_controller_diagnostic}
+provide a broader assessment of comparative
+performance.
 \end{revisedblock}
 
 
@@ -102,7 +107,18 @@ monsoon conditions: mean paired differences of 3.15, 9.67, and
 11.91\,kWh respectively, with 95\% confidence intervals excluding zero
 in all three cases. Under extreme conditions the paired difference is
 directionally consistent but the interval spans zero (3.60\,kWh, 95\%
-CI $[-0.18, 7.38]$). The difference is largest under Monsoon logistics and narrows under Extreme conditions, where prolonged delivery delays increasingly constrain fuel availability. However, the MPC comparisons also involve differences in planning horizon, forecast assumptions, and replenishment policy. The observed differences therefore cannot be attributed uniquely to any one of these factors.
+CI $[-0.18, 7.38]$). 
+\begin{revisedblock}
+The difference is largest under Monsoon logistics
+and narrows under Extreme conditions, where prolonged
+delivery delays increasingly constrain fuel
+availability. However, the MPC comparisons also
+involve differences in planning horizon, forecast
+assumptions, and replenishment policy. The observed
+differences therefore cannot be attributed uniquely
+to any one of these factors.
+\end{revisedblock}
+
 
 
 \begin{revisedblock}
@@ -130,7 +146,7 @@ over 10 sites $\times$ 10 seeds.}
 \begin{tabular}{llrrrrr}
 \toprule
 \textbf{Policy} & \textbf{Scenario} & \textbf{EENS} & \textbf{Diesel} &
-\textbf{Completed} & \textbf{Mean} & \textbf{Minimum} \\
+\revised{\textbf{Accepted}} & \textbf{Mean} & \textbf{Minimum} \\
  & & (kWh) & (kWh) & \textbf{orders/episode} & \textbf{inventory (\%)} & \textbf{inventory (\%)} \\
 \midrule
 RLInv  & Normal  & 0.02   & 222.9 & 2.16 & 78.8 & 52.4 \\
@@ -169,10 +185,12 @@ These results demonstrate the importance of
 accounting for diesel replenishment alongside
 dispatch decisions, but do not establish that
 jointly learned control is superior to all
-classical inventory policies. The extended
-controller comparisons in
-Section~\ref{sec:calibrated_baselines}
-examine this distinction further. The following
+classical inventory policies. 
+The extended controller comparisons in
+Subsections~\ref{sec:calibrated_baselines}
+and~\ref{sec:null_controller_diagnostic}
+examine this distinction further.
+The following
 ablations assess the contribution of individual
 design choices within the original RLInv
 experimental framework.
@@ -182,7 +200,7 @@ experimental framework.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=\textwidth]{fig_eens_comparison_v4.png}
-\caption{Overall policy performance across delivery scenarios. Policies,
+\caption{Performance of the original comparison policies across delivery scenarios. Policies,
 left to right: \textbf{B0} (threshold dispatch, fixed uncalibrated
 threshold ordering), \textbf{B1} (threshold dispatch, fixed-threshold $(s,S)$
 ordering), \textbf{MPC} (model-predictive dispatch; planning horizon
@@ -1889,9 +1907,11 @@ not a demonstrated scalable multi-tower deployment system.
 \label{sec:results_summary}
 % ============================================================
 \begin{sloppypar}
+\begin{revisedblock}
 The original evaluation showed that RLInv reduced Expected Energy Not Served (EENS) relative to the initial rule-based and optimisation-based baselines under the tested configurations. The expanded baseline study qualifies this result: calibrated B1*-HighBuffer approaches or improves on RLInv under stressed logistics, while a supplementary greedy-dispatch controller with feasible maximum replenishment achieves lower or tied mean EENS with slightly fewer accepted orders. These findings demonstrate the importance of replenishment but do not establish an incremental reliability or order-count advantage for the tested RLInv policy over the strongest simple reference controller. Under the evaluated fixed dispatch priority, EENS and diesel generation satisfy a site-specific conservation relationship, which is important when interpreting reliability and fuel-consumption results.
 
 The comparative RL study found broadly similar EENS across RLInv, unmasked PPO, DQN and A2C, with no statistically significant paired differences after multiplicity correction, although their ordering behaviour differed substantially. Computational evaluation demonstrated millisecond-scale local decision times. The shared-policy experiment required approximately one-fifth of the nominal source-site training interactions of five separately trained policies and achieved generally comparable, but not uniformly superior, reliability on five held-out sites. Limited target-site fine-tuning did not consistently improve EENS relative to the shared parent policy.
 
 Overall, the experiments establish the operational relevance of diesel inventory and replenishment decisions while identifying limitations in the measured incremental benefit of reinforcement learning under the implemented simulator and reward formulation. The results motivate future investigation of explicit replenishment economics and richer sequential control decisions, with comparison against appropriately calibrated classical alternatives.
+\end{revisedblock}
 \end{sloppypar}
