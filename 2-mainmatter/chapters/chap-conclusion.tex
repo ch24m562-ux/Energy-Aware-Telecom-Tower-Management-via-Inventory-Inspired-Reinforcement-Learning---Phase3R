@@ -27,25 +27,27 @@ order --- despite delayed replenishment being an important source of
 reliability risk in fuel-constrained deployments.
 \end{sloppypar}
 
-The problem was framed as a constrained Markov decision process in
-which a single policy (RLInv) controls generator commitment and diesel
-order quantity jointly, with battery dispatch handled by a fixed
-priority rule and an 11-dimensional observation vector including
-explicit inventory and pipeline state (Chapter~\ref{chap:problem}).
-RLInv was evaluated against eight comparator policies spanning
-rule-based, reinforcement learning, and optimisation-based approaches ---
-including, notably, a receding-horizon MPC baseline and an
-Oracle-MPC optimistic dispatch reference under perfect future load, solar-generation and grid-availability information, added specifically to distinguish whether any
-observed advantage reflects better \emph{ordering} or merely better
-\emph{dispatch} (Chapter~\ref{chap:methodology}). The final campaign
-evaluated all nine core policies across 10 ITU/Zindi sites and four
-delivery-logistics scenarios of increasing severity (Normal, Delayed,
-Monsoon, Extreme). The five learned policies (RLInv, TrackB, A5, A6,
-A7; see Table~\ref{tab:ablation-design}) used 10 independent training
-seeds, with all policies evaluated
-under the corresponding matched protocol and paired training-seed
-statistical comparisons for the primary policy and ablation analyses
-(Chapter~\ref{chap:experimental-execution}).
+\begin{revisedblock}
+The problem was formulated as a constrained Markov decision
+process in which RLInv jointly selects generator commitment
+and diesel replenishment. Battery dispatch follows a fixed
+priority rule, and the observation includes explicit
+inventory and pipeline state.
+
+The original campaign compared nine policies across ten
+ITU/Zindi sites and four delivery-logistics scenarios.
+Ten independent training seeds were used for the original
+learned-policy and ablation comparisons; the non-learning
+controllers instead use evaluation randomness. The
+extended experiments introduced calibrated and null-reference
+controllers, compared MaskablePPO, unmasked PPO, DQN and A2C
+using a five-seed training protocol, and measured computational
+cost and cross-site generalisation. Shared-policy transfer
+was evaluated on five held-out sites using three independently
+trained shared policies. These studies are distinguished by
+their training populations, comparators and evaluation
+protocols rather than pooled as a single matched experiment.
+\end{revisedblock}
 
 % ============================================================
 \section{Key Results and Discussion}
@@ -82,27 +84,32 @@ logistics, respectively. The 136.562\,kWh dispatch contrast
 is identical across scenarios because the no-order reference
 controllers do not depend on supplier lead time.
 
-The implemented energy reward can be written, using
-$U_t=R_t-D_t$, as
-$(99D_t-100R_t-0.4G_t)/\bar d$, in addition to stockout
-and physical-violation penalties. This gives a strong
-immediate incentive to supply diesel energy when it avoids
-unmet demand. As no explicit order-placement, ordered-volume
-or holding costs are included, a simple aggressive
-replenishment rule is a strong empirical comparator. The
-identity and reward expression explain the narrow reliability
-gaps observed among strong controllers, but do not prove the
-rule globally optimal or uniquely identify why RLInv did not
-match it.
+The implemented reward, after substituting
+$U_t=R_t-D_t$, is
+$(99D_t-100R_t-0.4G_t)/\bar d$ in the audited evaluation:
+all 20,000 supplementary null-controller episodes recorded
+zero stockout and physical-violation penalties, and the
+corresponding archived evaluation checks also found those
+penalties inactive. The energy expression is therefore exact
+for the audited episodes, not merely a partial reward term.
+It strongly favours supplying diesel energy when that avoids
+unmet demand. Since order-placement, ordered-volume and
+inventory-holding costs are absent, aggressive feasible
+replenishment is a strong empirical comparator. This does not
+prove that always-order-max is globally optimal or uniquely
+identify the cause of RLInv's remaining gap.
 
-Under the supplementary site-normalised reward comparison
-reported in Chapter~\ref{chap:results}, RLInv captures
-approximately 100.0\%, 99.5\%, 99.4\% and 98.9\% of the
-observed improvement from the no-DG/no-order reference to
-the highest-scoring evaluated controller across the four
-scenarios. These descriptive percentages show a small
-remaining gap relative to the observed reference-to-best
-range, not a theoretical bound on achievable performance.
+In the supplementary comparison, RLInv captured approximately
+100.0\%, 99.5\%, 99.4\% and 98.9\% of the observed reward
+improvement between the no-DG/no-order reference and the
+highest-scoring evaluated controller under Normal, Delayed,
+Monsoon and Extreme logistics, respectively. The scores use
+equal weighting of the ten sites after normalising each
+site's reward by its own mean hourly load $\bar d$.
+The common grid-energy contribution cancels in these
+within-scenario improvement ratios. These percentages are
+descriptive proportions of the observed reference-to-best
+range, not theoretical performance bounds.
 \end{revisedblock}
 
 
@@ -203,51 +210,76 @@ dynamics; the added complexity is not justified at the scale evaluated.
 \label{sec:conclusion_contributions}
 % ============================================================
 
-This thesis makes the following contributions to RL-based energy
-management of remote telecom infrastructure:
+\revised{This thesis makes five contributions to inventory-aware
+energy management for remote telecommunications infrastructure.}
 
 \begin{enumerate}
 
-  \item \textbf{A CMDP formulation with explicit, jointly controlled
-  inventory and dispatch decisions.} The inclusion of diesel inventory
-  and in-transit pipeline state alongside battery state-of-charge and
-  grid availability enables anticipatory ordering that reacts to
-  lead-time uncertainty before a stockout occurs, and is evaluated
-  against eight rule-based, RL-based and optimisation-based comparator
-  policies.
+\item \revised{\textbf{An inventory-coupled CMDP formulation.}
+The work represents diesel as a finite on-site stock replenished
+under stochastic supplier lead times, with in-transit orders
+included in the controller state. RLInv jointly selects generator
+commitment and discrete replenishment actions, while PV, grid and
+battery dispatch follow fixed priority rules. This brings the
+upstream fuel-supply decision into a problem that dispatch-only
+energy-management formulations do not explicitly address.}
 
-  \item \textbf{An empirical comparison of coupled and decomposed
-  control.} The study compares RLInv with rule-based, RL-based, and
-  optimisation-based alternatives. The A6 ablation provides a cleaner
-  practical assessment of learned replenishment, while its reduced
-  dispatch action space is acknowledged as a remaining design
-  difference. MPC and Oracle-MPC help contextualise dispatch and
-  forecasting quality; they do not by themselves isolate ordering. The
-  result is a genuinely
-  scenario-dependent finding, reported honestly rather than as a single
-  uniform verdict.
+\item \revised{\textbf{A conservation-audited benchmark with
+characterised discriminating power.}
+Under the evaluated fixed dispatch priority, unmet energy and
+diesel generation satisfy the site-specific identity
+$\mathrm{EENS}_i+E_{\mathrm{diesel},i}=R_i$ to numerical precision.
+The mean residual is 222.932\,kWh per 360-hour episode across the
+ten sites. In the four-algorithm comparison, 19 of 40
+site--scenario cells have exact EENS ties. The supplementary
+site-normalised reward analysis places RLInv within approximately
+0--1.1\% of the observed reference-to-best improvement range.
+These results quantify how strongly the current benchmark can
+distinguish otherwise competent controllers, rather than treating
+small aggregate differences as independent reliability and fuel
+benefits.}
 
-  \item \textbf{A qualified assessment of action masking.} Action
-  masking is implemented as deterministic feasibility filtering. The
-  cleaner RLInv--A7 comparison finds no statistically distinguishable
-  mean-EENS effect when ordering is jointly learned, while the larger
-  A6--TrackB gap under stressed logistics is confounded by differences
-  in observation design. This distinction prevents feasibility
-  enforcement from being mistaken for a universal performance gain.
+\item \revised{\textbf{A mechanistic, conditional finding about
+the value of learning.}
+For the audited evaluation episodes, stockout and physical-violation
+penalties did not activate. With $U_t=R_t-D_t$, the implemented
+energy reward reduces to
+$(99D_t-100R_t-0.4G_t)/\bar d$.
+This provides a strong incentive to make diesel available whenever
+it avoids unmet demand, without explicit order-placement,
+ordered-volume or inventory-holding costs. Although the original
+RLInv--A6 comparison favours joint learned control under selected
+scenarios, the non-learning always-order-max controller matches or
+improves on RLInv's mean EENS in all four logistics scenarios.
+The result establishes the operational importance of replenishment
+but not an incremental reliability advantage from learning it under
+the implemented formulation; it does not prove global optimality
+of the simple rule.}
 
-  \item \textbf{A reproducible multi-stage evaluation framework.} The
-  primary comparison and core ablations use the common 10-site,
-  10-seed, and four-scenario protocol. Additional reward, tank,
-  distributional, stochastic-grid, and delay-aware studies use
-  explicitly documented experimental grids appropriate to their
-  respective questions. Canonical source files, aggregation rules and
-  statistical units are documented for each analysis to support
-  reproducibility.
+\item \revised{\textbf{A broad, independently checked controller
+evaluation.}
+The study examines twenty controller configurations under the
+supplementary ten-site, four-scenario reward comparison, spanning
+initial and calibrated classical rules, MPC and Oracle-MPC,
+MaskablePPO, unmasked PPO, DQN, A2C, and simple null-reference
+controllers. The original, expanded RL and transfer comparisons
+retain their distinct training-seed and calibration protocols.
+Episode-level energy-conservation checks, baseline replay and
+independent physical-safety audits of the documented experiment
+subsets strengthen the reliability of the reported findings;
+they are not presented as identical verification or equal-compute
+training across all configurations.}
 
-  \item \textbf{An exploratory delay-aware extension.} The
-  delay-aware extension is reported as a verified exploratory study
-  that did not produce a consistent improvement under the tested
-  conditions.
+\item \revised{\textbf{A bounded cross-site generalisation result.}
+A shared RLInv policy trained on five source sites was evaluated
+without target-site updates on five held-out sites. It matched
+site-specific RLInv EENS in 53 of 60 paired
+site--seed--scenario cells, many of which were exact zero-EENS
+ties. Relative to five independently trained site-specific source
+policies, shared training used approximately one-fifth of the
+nominal environment interactions. This establishes a descriptive
+training-interaction advantage, not an equal-compute comparison,
+measured wall-clock saving or demonstration of fleet deployment.}
 
 \end{enumerate}
 
@@ -350,10 +382,17 @@ experimental population.}
 \section{Future Work}
 \label{sec:conclusion_future}
 % ============================================================
-
+\revised{The most direct next experiment is to make the
+reliability--cost trade-off operationally binding: charge
+explicitly for order placement, ordered fuel volume and
+inventory holding; expose flexible battery and grid dispatch
+subject to physical constraints; and model finite supplier
+capacity shared across towers. These are testable changes to
+the benchmark, not a presumption that a learned controller
+will then outperform calibrated rules.}
 The remaining research directions follow directly from the
 limitations and conditional findings identified in this thesis. Four
-major directions are discussed below, followed by two smaller
+major directions are discussed below, followed by three smaller
 extensions.
 
 \textbf{1.\ Richer logistics and supplier-behaviour modelling.} Two
@@ -392,17 +431,15 @@ itself to be validated empirically, rather than only stress-tested
 across plausible parametric forms.
 
 \begin{sloppypar}
-\textbf{4.\ Transfer learning and cross-region deployment.} The
-per-site evaluation across multiple profiles in this thesis trains and
-evaluates a separate
-policy per site; it is a per-site robustness check, not a test of
-whether a policy trained on a subset of sites transfers to unseen ones
-or to a different deployment region. Training on a subset of sites and
-evaluating on held-out sites, or on sites from a different geographic
-region with different solar, load, and outage characteristics, would
-test this directly and is the natural precursor to any claim of
-practical, low-cost deployment across a large or geographically diverse
-fleet.
+\revised{\textbf{4.\ External transfer and cross-region deployment.}
+The present study has already evaluated zero-shot shared-policy
+transfer to five held-out sites within the same dataset.
+Future work should test independent regions and longer seasonal
+records, with supplier and equipment variation beyond the
+original dataset. Such experiments should report both
+reliability and training/deployment cost under explicitly
+matched computational budgets, rather than extrapolating
+from the five-site nominal interaction comparison.}
 
 Three smaller extensions follow directly from the objective function and
 state representation already defined in this thesis, which could be
