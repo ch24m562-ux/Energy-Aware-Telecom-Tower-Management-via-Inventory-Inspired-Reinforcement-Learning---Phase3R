@@ -15,11 +15,15 @@ limitations, and directions for future research.
 \label{sec:conclusion_summary}
 % ============================================================
 \begin{sloppypar}
-This thesis investigated whether a unified reinforcement learning
-agent, jointly optimising energy dispatch and diesel inventory
-ordering, provides measurable operational advantages over decoupled
-classical and optimisation-based approaches, and how those advantages
-depend on delivery-logistics conditions. The gap motivating this work is
+
+\revised{This thesis investigated whether a
+reinforcement-learning agent jointly selecting
+diesel-generator commitment and replenishment
+actions provides measurable operational advantages
+over decomposed classical and optimisation-based
+approaches, and how those advantages depend on
+delivery-logistics conditions.}
+The gap motivating this work is
 practical: prior RL-based energy management for remote base stations
 routinely models battery dispatch and generator scheduling but omits
 the upstream replenishment decision --- when and how much diesel to
@@ -170,13 +174,18 @@ monotonically from 2.16 orders per episode under Normal logistics to
 delivery completion within the evaluation horizon becomes increasingly
 unlikely, while stockout events remain at zero even under Extreme
 stress --- non-zero EENS occurs without recorded diesel stockout or
-hard constraint violation. A sensitivity analysis across a wider
-sequence of mean delivery
-lead times shows RLInv's advantage over the best classical baseline
-peaking at 29.5\,kWh around 72\,h and narrowing to 8.6\,kWh by 336\,h;
-this narrowing reflects a physical constraint common to every policy
-(tank capacity bounds how much can be pre-ordered regardless of
-strategy), not RLInv ceasing to function.
+hard constraint violation. 
+\revised{A sensitivity analysis across mean
+delivery lead times shows RLInv's advantage
+over the original fixed-threshold B1 baseline
+peaking at 29.5\,kWh around 72\,h and narrowing
+to 8.6\,kWh by 336\,h. This narrowing is
+consistent with finite tank capacity limiting
+the benefit of different replenishment
+strategies under prolonged delivery delays.
+The comparison does not include the subsequently
+calibrated B1* controllers.}
+
 
 RLInv's performance is robust to the tested reward-coefficient choices
 (EENS varies by only 3.32\,kWh across the evaluated $\lambda$ range of
@@ -417,9 +426,9 @@ supplier and competing for delivery capacity during regional
 disruptions. The single-tower CMDP formulated here cannot capture this
 coordination problem. Future work could model shared supplier capacity
 through multi-agent reinforcement learning, centralised fleet
-optimisation, or hybrid coordination approaches, as the natural
-fleet-level counterpart to the single-tower joint-optimisation result
-established here.
+optimisation, or hybrid coordination approaches, \revised{as a fleet-level extension of the
+single-tower inventory-coupled formulation
+evaluated in this thesis.}
 
 \textbf{3.\ Validation against empirical delivery datasets.} Every
 distributional-robustness check in this thesis (geometric, lognormal,
