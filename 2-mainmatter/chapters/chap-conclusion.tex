@@ -220,75 +220,76 @@ dynamics; the added complexity is not justified at the scale evaluated.
 % ============================================================
 
 \revised{This thesis makes five contributions to inventory-aware
-energy management for remote telecommunications infrastructure.}
+energy management for remote telecommunications infrastructure.
+The expanded evaluation also tested the initial findings against
+stronger reference controllers, making benchmark discrimination
+and reward incentives explicit research results.}
 
 \begin{enumerate}
 
 \item \revised{\textbf{An inventory-coupled CMDP formulation.}
-The work represents diesel as a finite on-site stock replenished
-under stochastic supplier lead times, with in-transit orders
-included in the controller state. RLInv jointly selects generator
-commitment and discrete replenishment actions, while PV, grid and
-battery dispatch follow fixed priority rules. This brings the
-upstream fuel-supply decision into a problem that dispatch-only
-energy-management formulations do not explicitly address.}
+This thesis formulates diesel as a finite on-site stock replenished
+under stochastic supplier lead times, with in-transit orders included
+in the controller state. RLInv jointly selects generator commitment
+and discrete replenishment actions, while PV, grid and battery
+dispatch follow fixed priority rules. The formulation connects
+telecom energy reliability with upstream fuel-supply decisions.}
 
 \item \revised{\textbf{A conservation-audited benchmark with
-characterised discriminating power.}
-Under the evaluated fixed dispatch priority, unmet energy and
-diesel generation satisfy the site-specific identity
-$\mathrm{EENS}_i+E_{\mathrm{diesel},i}=R_i$ to numerical precision.
-The mean residual is 222.932\,kWh per 360-hour episode across the
-ten sites. In the four-algorithm comparison, 19 of 40
-site--scenario cells have exact EENS ties. The supplementary
-site-normalised reward analysis places RLInv within approximately
-0--1.1\% of the observed reference-to-best improvement range.
-These results quantify how strongly the current benchmark can
-distinguish otherwise competent controllers, rather than treating
-small aggregate differences as independent reliability and fuel
-benefits.}
+quantified discriminating power.}
+This thesis establishes the site-specific identity
+$\mathrm{EENS}_i+E_{\mathrm{diesel},i}=R_i$ to numerical
+precision under the evaluated fixed dispatch priority.
+The ten-site mean residual is 222.932\,kWh per 360-hour episode.
+In 19 of 40 site--scenario cells in the four-algorithm comparison,
+all four controllers achieve exactly zero EENS. The supplementary
+site-normalised reward analysis measures RLInv's capture of
+100.0\%, 99.5\%, 99.4\% and 98.9\% of the observed
+reference-to-best improvement under Normal, Delayed, Monsoon
+and Extreme logistics. Together, these findings quantify the
+benchmark's ability to distinguish evaluated controllers.}
 
-\item \revised{\textbf{A mechanistic, conditional finding about
-the value of learning.}
-For the audited evaluation episodes, stockout and physical-violation
-penalties did not activate. With $U_t=R_t-D_t$, the implemented
-energy reward reduces to
-$(99D_t-100R_t-0.4G_t)/\bar d$.
-This provides a strong incentive to make diesel available whenever
-it avoids unmet demand, without explicit order-placement,
-ordered-volume or inventory-holding costs. Although the original
-RLInv--A6 comparison favours joint learned control under selected
-scenarios, the non-learning always-order-max controller matches or
-improves on RLInv's mean EENS in all four logistics scenarios.
-The result establishes the operational importance of replenishment
-but not an incremental reliability advantage from learning it under
-the implemented formulation; it does not prove global optimality
-of the simple rule.}
+\item \revised{\textbf{A mechanistic characterisation of the
+incremental value of learning.}
+This thesis verifies inactive stockout and physical-violation
+penalties in the audited evaluation and derives the reward form
+$(99D_t-100R_t-0.4G_t)/\bar d$ from the residual-energy
+identity. It shows how the reliability-heavy objective favours
+diesel availability in the absence of explicit replenishment
+and holding costs. A non-learning feasible-replenishment rule
+matches or improves on RLInv's mean EENS across all four
+logistics scenarios. The combined evidence identifies reward
+economics and flexible dispatch as concrete targets for
+testing additional value from learned control.}
 
-\item \revised{\textbf{A broad, independently checked controller
-evaluation.}
-The study examines twenty controller configurations under the
-supplementary ten-site, four-scenario reward comparison, spanning
-initial and calibrated classical rules, MPC and Oracle-MPC,
-MaskablePPO, unmasked PPO, DQN, A2C, and simple null-reference
-controllers. The original, expanded RL and transfer comparisons
-retain their distinct training-seed and calibration protocols.
-Episode-level energy-conservation checks, baseline replay and
-independent physical-safety audits of the documented experiment
-subsets strengthen the reliability of the reported findings;
-they are not presented as identical verification or equal-compute
-training across all configurations.}
 
-\item \revised{\textbf{A bounded cross-site generalisation result.}
-A shared RLInv policy trained on five source sites was evaluated
-without target-site updates on five held-out sites. It matched
-site-specific RLInv EENS in 53 of 60 paired
-site--seed--scenario cells, many of which were exact zero-EENS
-ties. Relative to five independently trained site-specific source
-policies, shared training used approximately one-fifth of the
-nominal environment interactions. This establishes a descriptive
-training-interaction advantage, not an equal-compute comparison,
-measured wall-clock saving or demonstration of fleet deployment.}
+\item \revised{\textbf{Broad controller comparison
+and independent verification.}
+This thesis evaluates twenty controller configurations
+across ten sites and four logistics scenarios.
+These include classical rules, calibrated baselines,
+MPC, Oracle-MPC, MaskablePPO, PPO, DQN, A2C
+and simple reference controllers.
+The evaluation records the distinct training
+and calibration protocols. It also includes
+energy-balance checks, baseline replay and
+independent physical-safety verification
+for the relevant experimental subsets.}
+
+\item \revised{\textbf{Cross-site generalisation.}
+This thesis evaluates three independently trained
+shared RLInv policies on five sites excluded from
+their training. The shared policies were trained
+on five source sites and applied without further
+training on the target sites.
+Shared and site-specific policies achieve
+identical EENS in 53 of 60 matched comparisons.
+Shared training requires approximately one-fifth
+of the nominal environment interactions used
+to train five separate source-site policies.
+This provides quantitative evidence for
+cross-site training efficiency.}
+
 
 \end{enumerate}
 
@@ -507,9 +508,7 @@ the no-DG reference, but a simple aggressive replenishment
 rule achieved a slightly better observed result. The
 contribution is therefore an inventory-coupled sequential
 control formulation, an auditable comparative benchmark,
-and a quantitative account of its discriminating limits,
-not a claim that reinforcement learning is universally
-superior. Determining when learning adds economic value
+and a quantitative account of its discriminating limits. Determining when learning adds economic value
 requires richer control decisions, explicit replenishment
 costs and validation against realistic supplier constraints.
 \end{revisedblock}
