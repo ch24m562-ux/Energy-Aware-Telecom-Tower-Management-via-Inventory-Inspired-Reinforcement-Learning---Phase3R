@@ -112,13 +112,13 @@ corrected.
 % ============================================================
 
 Table~\ref{tab:training_workload} summarises the training workload
-actually executed for the final Phase 3 campaign.
+actually executed for the original Phase 3 campaign.
 
 \begin{table}[htb]
 \centering
 \small
 \setlength{\tabcolsep}{5pt}
-\caption{Total training workload, final campaign.}
+\caption{Total training workload, original Phase~3 campaign.}
 \label{tab:training_workload}
 \begin{tabular}{lrp{5.8cm}}
 \toprule
@@ -245,7 +245,7 @@ reason.
 \label{sec:eval_execution}
 % ============================================================
 
-The final evaluation campaign comprises:
+The original Phase~3 evaluation campaign comprises:
 \[
 9 \text{ policies} \times 10 \text{ sites} \times 10 \text{ seeds}
 \times 4 \text{ scenarios} \times 10 \text{ episodes} =
@@ -267,6 +267,129 @@ randomise initial inventory over the narrower range
 $[0.3,\,0.9]\,C^{\Tank}$, testing the policy across a realistic range of
 deployment starting conditions.
 
+
+\subsection{\revised{Supplementary Evaluation Protocols}}
+
+\begin{revisedblock}
+The original 44,000-rollout archive was supplemented
+by separate evaluation cohorts addressing calibrated
+classical control, simple non-learning references,
+alternative reinforcement-learning algorithms and
+cross-site generalisation.
+
+These cohorts used different training-seed counts,
+evaluation-seed blocks and calibration procedures.
+Their episode counts therefore describe distinct
+experimental scopes rather than a single pooled
+statistical population.
+\end{revisedblock}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\caption{\revised{Principal original and supplementary
+evaluation cohorts. Counts refer to reported
+controller evaluations; some historical evaluations
+were reused in subsequent comparisons.}}
+\label{tab:supplementary_protocols}
+
+\begin{tabularx}{\textwidth}{
+p{2.6cm}
+p{5.0cm}
+X
+}
+\toprule
+\textbf{Cohort} &
+\textbf{Evaluation scope} &
+\textbf{Purpose} \\
+\midrule
+
+Original Phase 3 &
+Nine core policies; ten sites; ten seeds;
+four scenarios; ten episodes per cell;
+36,000 core plus 8,000 exploratory rollouts &
+Original comparisons and ablations \\
+
+Calibrated classical &
+Four $(s,S)$ configurations;
+ten sites; four scenarios;
+ten evaluation-seed blocks;
+16,000 held-out episodes &
+Calibration and comparison of classical
+replenishment policies \\
+
+Null controllers &
+Five non-learning controllers;
+ten sites; four scenarios;
+ten evaluation-seed blocks;
+20,000 episodes &
+Non-learning reference diagnostic \\
+
+Four-algorithm RL &
+RLInv, A7, DQN and A2C;
+ten sites; five training seeds;
+four scenarios; 8,000 episodes &
+Alternative RL algorithms \\
+
+Shared zero-shot RLInv &
+Three shared training seeds;
+five held-out sites;
+four scenarios; 600 episodes &
+Cross-site generalisation \\
+
+Target-site adaptation &
+Two target sites; three seeds;
+scratch and fine-tuned 50k/100k arms;
+960 episodes &
+Adaptation versus scratch training \\
+
+Source-calibrated B1 &
+Three classical configurations;
+five held-out sites;
+three evaluation-seed blocks;
+1,800 episodes &
+Shared-policy versus source-calibrated
+classical comparison \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\subsection{\revised{Independent Verification Procedures}}
+
+\begin{revisedblock}
+The expanded evaluation incorporated checks separate
+from the training and performance-analysis procedures.
+
+Energy-accounting checks examined simulator transitions
+and conservation relationships under the implemented
+dispatch rules. Historical baseline replay was used
+to check consistency with archived controller results.
+
+The physical-safety gate (PSG) independently examined
+native evaluation traces for physical bounds,
+action feasibility, masking consistency and recorded
+energy outcomes. Deliberately modified test cases
+served as negative controls to check whether the
+verification procedure detected specified violations.
+
+The G4 evidence-comparability gate (ECG) examined
+checkpoint and normalisation artifacts, dataset
+and source fingerprints, matched evaluation keys
+and initial conditions. Its archived evidence records
+verified matching for the evaluated artifacts while
+identifying unresolved historical training-source
+and normalisation-provenance items.
+
+These checks did not change the frozen controller
+weights or accepted evaluation outcomes. Verification
+results and PASS counts are reported only for the
+corresponding audited cohorts in
+Chapter~\ref{chap:results}.
+\end{revisedblock}
 
 % ============================================================
 \section{Statistical Framework}
@@ -307,14 +430,17 @@ Orders placed   & Count of accepted (post-mask, post-clip) non-zero
 \end{table}
 
 
-The original H1--H3 hypothesis comparisons
-use paired training-seed means. Evaluation
-episodes are first averaged within each seed,
-and the corresponding seed-level results are
-compared across the trained policies. This
-avoids treating repeated episodes from the
-same learned model as independent training
-replicates.
+
+\revised{The original H1--H3 hypothesis comparisons
+use paired training-seed means. For each policy,
+scenario and training seed, the ten evaluation
+episodes at each of the ten sites are averaged,
+followed by averaging across sites. This produces
+ten paired seed-level observations per scenario,
+rather than treating the 100 site--seed combinations
+or individual evaluation episodes as independent
+observations for these tests.}
+
 
 The original RLInv--Oracle-MPC comparison
 was initially analysed using 100 site--seed

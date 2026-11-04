@@ -550,7 +550,9 @@ these choices.
 \label{sec:comparison_policies}
 % ============================================================
 
-Six primary policies and three targeted ablations are evaluated.
+
+The original evaluation comprised six primary
+comparison policies and three targeted ablations.
 Table~\ref{tab:ablation-design} maps every policy to the architectural
 question it addresses; Figure~\ref{fig:rlinv_trackb} contrasts the two
 principal control architectures directly.
@@ -648,11 +650,11 @@ information) rather than a persistence estimate, and its planning
 horizon extends to the full 360-step evaluation episode rather than 24
 hours. Diesel ordering remains governed by the \revised{default} $(s,S)$ rule, and
 delivery timing remains stochastic.
-\revised{Oracle-MPC serves as an optimistic dispatch
-reference. The comparison with RLInv evaluates
-performance relative to this reference while
-retaining the documented differences in
+\revised{Oracle-MPC serves as a perfect-information
+dispatch reference. The comparison with RLInv
+retains the documented differences in
 replenishment and dispatch configurations.}
+
 
 \textbf{B0} is a rule-based heuristic: a fixed-threshold inventory
 policy using uncalibrated inventory thresholds, paired with threshold
@@ -726,7 +728,7 @@ Oracle-MPC &
 $(s,S)$ rule &
 MILP, $H{=}360$ &
 Perfect &
-Optimistic reference with perfect future load, PV, and grid availability \\
+\revised{Perfect-information dispatch reference}\\
 TrackB &
 $(s,S)$ rule &
 Learned (PPO) &
@@ -756,6 +758,81 @@ Proposed system \\
 \end{tabularx}
 \end{table}
 
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\caption{\revised{Controller comparison groups,
+information access, calibration and interpretation scope.}}
+\label{tab:comparison_fairness}
+\begin{tabularx}{\textwidth}{
+p{2.1cm}
+p{3.1cm}
+p{3.1cm}
+X
+}
+\toprule
+\textbf{Group} &
+\textbf{Information access} &
+\textbf{Training or calibration} &
+\textbf{Comparison scope} \\
+\midrule
+
+Original B0/B1 &
+Current system observations &
+Fixed heuristic thresholds &
+Original rule-based reference configurations \\
+
+MPC / Oracle-MPC &
+Persistence forecasts / realised future energy traces &
+MILP dispatch; default $(s,S)$ ordering &
+Dispatch references with different forecast information
+and planning horizons \\
+
+Original RL controllers &
+Site-specific training observations &
+Ten training seeds; nominal 400k steps per run &
+Original configuration and ablation comparisons;
+action and observation spaces differ \\
+
+Calibrated classical B1 variants &
+Site-specific days 1--45 &
+Analytic thresholds or training-window
+$(s,S)$ calibration &
+Held-out classical comparison;
+training and tuning procedures differ \\
+
+Supplementary null controllers &
+Current simulator state and feasible actions &
+Fixed non-learning decision rules &
+Tests whether learning provides an incremental
+advantage under the evaluated objective \\
+
+Four-algorithm RL comparison &
+Site-specific training observations &
+Five training seeds; nominal 400k steps;
+training initialisation differs &
+Matched held-out evaluation;
+not an isolated algorithm comparison \\
+
+Shared RLInv / source-calibrated B1 &
+Five source sites only &
+Shared training or source-only threshold calibration &
+Held-out-site comparison with source-data access
+restricted to the same sites; compute differs \\
+
+Target-site adaptation &
+Source-pretrained policy or target-site training data &
+50k/100k target interactions, with or without
+source pretraining &
+Adaptation comparison; total prior training
+exposure differs \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
 
 % ============================================================
 \section{Experimental Protocol}
@@ -836,22 +913,27 @@ two additional variants, \texttt{multi} and
 \texttt{mpc\_forecast}.
 
 
-\revised{The original H1--H3 hypothesis tests use
-paired training-seed means ($n=10$), with
-evaluation episodes averaged within each seed.
-The original RLInv--Oracle-MPC analysis also
-reported confidence intervals from 100
-site--seed observations. A subsequent reanalysis
-uses ten paired site-level means for cross-site
-inference, accounting for the shared site
-structure. The expanded four-algorithm
-comparison likewise uses ten paired site means
-after averaging training seeds and evaluation
-episodes within each site.
 
-The results and statistical units for these
+
+\revised{The original H1--H3 hypothesis tests use
+paired training-seed means ($n=10$).
+For each policy and scenario, evaluation episodes
+and sites are averaged within each training seed,
+giving ten paired observations per scenario.}
+
+\revised{The original RLInv--Oracle-MPC analysis reported
+confidence intervals from 100 site--seed observations.
+Its subsequent reanalysis uses ten paired site-level
+means for cross-site inference. The expanded
+four-algorithm comparison likewise uses ten paired
+site means after averaging training seeds and
+evaluation episodes within each site.}
+
+\revised{The results and statistical units for these
 different experimental comparisons are
 reported in Chapter~\ref{chap:results}.}
+
+
 A subset of three sites (site2, site5, site7) is
 additionally used for finer-grained robustness checks in
 Chapter~\ref{chap:results} where a smaller, more tractable evaluation
