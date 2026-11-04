@@ -111,11 +111,15 @@ to existing approaches.
 \section{Research Problem and Objectives}
 % ============================================================
 
-The problem addressed here is how to coordinate energy resources
-and diesel replenishment in hybrid telecom towers under significant uncertainty
-in solar generation, grid availability, and diesel delivery, so as to minimise
-unserved energy and operational expenditure while improving service
-reliability and respecting operational constraints.
+
+\revised{The problem addressed here is how to coordinate
+diesel-generator operation and fuel replenishment
+in hybrid telecom towers under uncertainty in
+solar generation, grid availability and diesel
+delivery, with the objective of reducing unserved
+energy while respecting operational constraints.}
+
+
 
 The central research question is:
 
@@ -159,75 +163,77 @@ The specific objectives of this work are to:
   modelled as a \textbf{finite replenishable inventory} subject to stochastic
   delivery lead times.
 
-  \item Design and train reinforcement learning agents capable of jointly
-  learning energy dispatch and diesel replenishment strategies under
-  operational constraints, alongside decomposed control baselines in
-  which ordering and dispatch are learned or optimised separately.
+
+
+\item \revised{Design and train reinforcement-learning
+controllers that jointly select diesel-generator
+commitment and replenishment actions, and compare
+them with decomposed and classical control policies.}
+
+
 
   \item Develop a Gymnasium-compatible simulation environment driven by real
   ITU/Zindi telecom site traces that reproduces empirically grounded load,
   PV generation, and grid availability dynamics at hourly resolution.
 
-  \item Benchmark the learned RL policies against rule-based,
-  decomposition-based, and optimisation-based baselines --- including MPC and
-  a perfect-information Oracle-MPC reference --- across ten sites and four
-  delivery-logistics scenarios of increasing severity, with the learned
-  policies trained across ten independent seeds. Quantify improvements in
-  unserved energy, diesel
-  consumption, and operational reliability, with paired seed-level
-  statistical analysis for the core policy and ablation comparisons.
+  
+
+\item \revised{Evaluate the controllers across ten sites
+and four delivery-logistics scenarios, including
+classical and optimisation-based references,
+targeted ablations, alternative RL algorithms
+and cross-site generalisation. Report reliability,
+diesel generation, replenishment behaviour and
+statistical uncertainty under the respective
+evaluation protocols.}
+
+
 \end{enumerate}
 
 
 % ============================================================
-\section{Contributions}
+\section{\revised{Contributions}}
 % ============================================================
 
 The main contributions of this thesis are:
 
+
 \begin{enumerate}
-  \item A telecom-tower-specific, inventory-theoretic CMDP formulation that
-  explicitly represents battery state-of-charge and diesel fuel volume as
-  state variables subject to uncertain demand, stochastic replenishment lead
-  times, and operational cost, reliability, and feasibility penalties.
 
-  \item The design and empirical evaluation of a constrained reinforcement
-  learning framework---\textbf{RLInv}---for hybrid telecom tower energy
-  management, including inventory-aware state and action design with hard
-action masking to prevent infeasible control actions. RLInv is benchmarked against
-  a dispatch-only RL policy with externally
-  managed replenishment (TrackB), optimisation-based dispatch policies
-  (MPC and Oracle-MPC), and the A6 ablation. The RLInv--A6
-  comparison provides a cleaner practical replenishment comparison than
-  TrackB, while the reduced dispatch action space used by A6 remains an
-  acknowledged design difference, not present in
-  the RL-based telecom energy management literature reviewed in
-  Chapter~\ref{chap:literature}.
+\item An inventory-coupled CMDP formulation for
+hybrid telecom towers, representing diesel as
+finite replenishable stock with stochastic
+delivery lead times and in-transit orders.
 
-  \item A reproducible simulation environment and experimental protocol
-  integrating the ITU~2024 Smart Energy Scheduling dataset (ten base station
-  sites, 60~days each) with a synthetic lead-time overlay, evaluated across
-  four delivery-logistics scenarios with the learned policies trained across
-  ten independent seeds, with
-  paired seed-level statistical analysis for the core policy and ablation
-  comparisons.
+\item The design and evaluation of RLInv, which
+jointly selects diesel-generator commitment
+and replenishment actions, together with
+decomposed controllers and targeted ablations
+examining ordering, masking and observability.
 
-  \item A scenario-dependent empirical characterisation of when joint
-  optimisation is beneficial: the H1 comparison favours RLInv under the Normal
-and Extreme logistics scenarios, while no statistically distinguishable advantage
-  is observed under Delayed or Monsoon conditions.
-  
-   \item A larger architecture-dependent gap is observed under stressed
-  logistics in the externally managed replenishment comparison
-  (A6 vs.\ TrackB), while the cleaner RLInv--A7 comparison finds no
-  measurable independent mean-EENS benefit from masking when
-  replenishment is already learned jointly.
+\item A simulation-based experimental benchmark
+using ten ITU/Zindi sites and four logistics
+scenarios, with documented controller comparisons,
+energy-accounting checks and independent
+verification of selected evaluation cohorts.
 
-  \item An exploratory extension investigating explicit delivery-delay
-  tracking (RLInv-DA) is also reported: explicit
-  delay awareness did not provide a consistent improvement over RLInv under
-  the tested conditions.
+\item An expanded evaluation against calibrated
+classical policies, alternative RL algorithms
+and non-learning reference controllers. The
+results identify conditions where RLInv performs
+well, while showing that a simple feasible
+replenishment rule can match or improve its
+reliability under the implemented objective.
+
+\item A cross-site generalisation study comparing
+shared RLInv policies with site-specific
+training and classical references on five
+held-out sites, including evaluations of
+zero-shot transfer, adaptation and training
+requirements.
+
 \end{enumerate}
+
 
 
 % ============================================================
@@ -254,14 +260,15 @@ process introduced into the principal experiments. Load, PV generation, and grid
   are drawn directly from the ITU site traces, while component parameters
   and operational constraints are specified from the adopted engineering
   assumptions.
-  \item Statistical comparisons use $n = 10$ independent seeds with paired
-  testing across identical site--scenario combinations (an increase from
-  an $n=3$ pilot evaluation conducted earlier in the project). This
-  improves statistical power considerably, but for some comparisons ---
-  particularly the inventory-observability ablation (H3) --- the
-  differences remain small and are not statistically distinguishable
-  under the final protocol; additional replication could clarify whether
-  a small effect exists.
+  
+\item The original hypothesis tests use ten
+paired training-seed means. The supplementary
+algorithm comparisons and cross-site experiments
+use their respective training populations and
+statistical units, as specified in
+Chapters~\ref{chap:experimental-execution}
+and~\ref{chap:results}.
+
 \end{itemize}
 
 Limitations arising from these choices include:
@@ -272,8 +279,7 @@ Limitations arising from these choices include:
   subsequently evaluated across four representative logistics scenarios.
   Chapter~\ref{chap:methodology} describes the training protocol in
   detail, while Chapter~\ref{chap:results} presents the corresponding
-  evaluation results. RLInv's advantage over classical ordering is
-  scenario-dependent rather than uniform, and narrows at very long delivery
+  evaluation results. RLInv's advantage over the original fixed-threshold B1 baseline is scenario-dependent rather than uniform, and narrows at very long delivery
   lead times as physical tank capacity becomes the binding constraint for
   every policy evaluated, not a training-distribution failure specific to
   RLInv (Chapter~\ref{chap:results}).
@@ -294,14 +300,16 @@ These aspects are identified as promising directions for future work.
 \section{Code Availability}
 \label{sec:code_availability}
 
-To support reproducibility, the complete implementation developed for
-this research --- including the simulation environment, training
-scripts, evaluation framework, baseline implementations, and analysis
-utilities --- is publicly available~\cite{rlinv_code_repo}. Trained
-model checkpoints and proprietary dataset artefacts are not included in
-the public repository because of their size and distribution
-constraints; however, the complete implementation required to reproduce
-the experimental workflow is provided.
+
+The source code for the simulation environment, training and
+evaluation procedures, together with selected experimental
+results, is publicly available in the project
+repository~\cite{rlinv_code_repo}.
+
+Trained policy checkpoints and their corresponding
+\texttt{VecNormalize} statistics are retained separately
+and are not included in the public repository.
+
 
 % ============================================================
 \section{Thesis Roadmap and Organisation}
