@@ -1,0 +1,173 @@
+\section*{Thesis and Candidate Details}
+
+\vspace{\baselineskip}
+
+\begin{enumerate}
+    \item \textbf{Thesis Title:} Energy-Aware Telecom Tower Management via Inventory-Inspired Reinforcement Learning
+    \item \textbf{Student Name:} Sangeeta Gupta
+    \item \textbf{Roll Number:} CH24M562
+    \item \textbf{Degree:} Master of Technology in Industrial Artificial Intelligence
+    \item \textbf{Previous Viva Date:} 05 August 2026
+    \item \textbf{Phase in Previous Viva:} Phase 3
+    \item \textbf{Mentor Name(s):}
+      \begin{enumerate}
+        \renewcommand{\labelenumii}{(\roman{enumii})}
+        \item Mentor 1 Name: Muthu Murugan Sethuraman
+      \end{enumerate}
+\end{enumerate}
+
+\clearpage
+
+\section*{\centering{Response to comments by Examiner 1}}
+
+\begin{flushleft}
+\noindent\textbf{Examiner Name:} \textit{}
+
+\vspace{\baselineskip}
+
+\noindent\textbf{General assessment recorded in the feedback:}
+
+\noindent\textbf{Overall feedback on viva:} Viva performance was satisfactory; responses were generally well-articulated.
+
+\noindent\textbf{Detailed Feedback (general):} The report is well written. The presentation was good. The candidate answered the questions well.
+
+\vspace{\baselineskip}
+
+\noindent The written feedback and next action points are addressed below. The observation on the baseline method, recorded alongside the second detailed recommendation, is treated as a separate item to identify the corresponding thesis changes. The two action points are also addressed separately.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Comment 1 (Overall feedback on performance):} Demonstrated good understanding during Q\&A, but analysis lacks breadth.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Response:}
+
+The evaluation has been extended beyond the original MaskablePPO study to include a calibrated classical replenishment baseline, alternative reinforcement-learning algorithms, supplementary non-learning reference controllers, and shared-policy transfer experiments. The revised analysis reports comparable evaluation conditions and distinguishes observed numerical differences from statistically supported conclusions. In particular, the stronger classical and non-learning controllers qualify the original interpretation of the incremental benefit attributable to jointly learned replenishment. The resulting discussion identifies both the strengths and the limitations of the proposed controller under the implemented simulator and reliability objective.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Changes in Thesis:}
+\begin{enumerate}
+  \item Expanded the classification, information access and fairness of the comparison controllers (Section~\ref{sec:comparison_policies}; Table~\ref{tab:comparison_fairness}).
+  \item Added calibrated classical baselines and a supplementary non-learning-controller comparison (Sections~\ref{sec:calibrated_baselines} and~\ref{sec:null_controller_diagnostic}; Tables~\ref{tab:calibrated_baselines} and~\ref{tab:null_controller_comparison}).
+  \item Added the four-algorithm reinforcement-learning study and cross-site transfer evaluation (Sections~\ref{sec:g4_rl_comparison} and~\ref{sec:g5b_zero_shot}; Tables~\ref{tab:g4_rl_ten_site} and~\ref{tab:g5b_zero_shot_sites}).
+  \item Revised the combined interpretation and limitations (Sections~\ref{sec:conclusion_results} and~\ref{sec:conclusion_limitations}).
+\end{enumerate}
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Comment 2 (Overall feedback on work):} The work presents a focused approach but needs comparative analysis and scalability considerations.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Response:}
+
+The revised work includes direct comparisons with alternative RL controllers, calibrated classical ordering rules, optimisation-based dispatch policies, and non-learning references. Scalability is assessed separately in terms of local decision latency, training requirements, and generalisation across sites. A shared RLInv policy was evaluated without target-site training on five held-out sites and compared with site-specific policies. The findings are reported with their evaluation cohorts and limitations, rather than treating a favourable inference-time measurement or a small average EENS difference as proof of fleet-level scalability.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Changes in Thesis:}
+\begin{enumerate}
+  \item Documented the distinct supplementary evaluation protocols and verification procedures (Section~\ref{sec:eval_execution}; Table~\ref{tab:supplementary_protocols}).
+  \item Expanded comparative evaluation of RL and classical controllers (Sections~\ref{sec:calibrated_baselines} and~\ref{sec:g4_rl_comparison}).
+  \item Added computational benchmarking and held-out-site generalisation results (Sections~\ref{sec:controller_computational_cost} and~\ref{sec:g5b_zero_shot}; Tables~\ref{tab:rl_computational_cost} and~\ref{tab:g5b_zero_shot_sites}).
+  \item Expanded the scalability discussion and limitations (Sections~\ref{sec:g5b_scalability_limits} and~\ref{sec:conclusion_limitations}).
+\end{enumerate}
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Comment 3 (Detailed Feedback, Item 1):} It would be good to compare the performance of different RL techniques instead of just focussing on one algorithm.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Response:}
+
+A supplementary four-controller study compares RLInv (MaskablePPO), unmasked PPO (A7), Deep Q-Network (DQN), and Advantage Actor--Critic (A2C). The ten-site study uses five training seeds, four delivery-logistics scenarios, and ten held-out evaluation episodes per site--seed--scenario, comprising 8,000 evaluation episodes. DQN records the lowest numerical mean EENS under Delayed, Monsoon and Extreme logistics; however, the exploratory paired comparisons do not establish statistically significant differences after Holm correction. Separate analyses examine ordering requests, accepted replenishment actions, and shorter training budgets. Differences in masking and historical training conditions are disclosed as limitations of direct algorithm attribution.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Changes in Thesis:}
+\begin{enumerate}
+  \item Added the four-controller RL reliability comparison and matched-cohort analysis (Section~\ref{sec:g4_rl_comparison}; Table~\ref{tab:g4_rl_ten_site}).
+  \item Added the ordering and action-feasibility comparisons (Tables~\ref{tab:g4_order_quantity_subset} and~\ref{tab:g4_order_waterfall}).
+  \item Added the supplementary DQN/A2C checkpoint-based training-budget analysis (Appendix~\ref{app:rl_training_budget}).
+\end{enumerate}
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Comment 4 (Detailed Feedback, Item 2):} It will be good to study the scalability of this method.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Response:}
+
+The scalability study measures local controller inference latency, recorded training effort, and generalisation to held-out telecom sites. On the tested CPU, the four RL controllers have median controller-call latencies between 0.538 and 1.421\,ms, excluding simulator stepping and communications. The shared-policy experiment trains on five source sites and evaluates on five other sites, with 600 held-out episodes. Shared and site-specific RLInv achieve identical EENS in 53 of 60 site--seed--scenario comparisons, many at zero EENS; differences are concentrated at site5, where site-specific training performs better. The thesis therefore reports measured computational feasibility and conditional transfer behaviour, without asserting general fleet-deployment scalability.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Changes in Thesis:}
+\begin{enumerate}
+  \item Added per-decision latency, parameter counts, checkpoint sizes and solver timing measurements (Section~\ref{sec:controller_computational_cost}; Tables~\ref{tab:rl_computational_cost} and~\ref{tab:classical_computational_cost}).
+  \item Added five-site zero-shot transfer and target-site adaptation evaluations (Sections~\ref{sec:g5b_zero_shot} and~\ref{sec:g5b_adaptation}; Tables~\ref{tab:g5b_zero_shot_sites} and~\ref{tab:g5b_site5_adaptation}).
+  \item Added explicit limitations concerning site diversity, training-seed variability and untested deployment overhead (Sections~\ref{sec:g5b_scalability_limits} and~\ref{sec:conclusion_limitations}).
+\end{enumerate}
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Comment 5 (Detailed Feedback, baseline observation):} missing proper baseline method
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Response:}
+
+The baseline evaluation has been strengthened by distinguishing the original fixed-threshold B1 policy, an analytic replenishment threshold, and two training-window-calibrated $(s,S)$ configurations. The comparison also retains rule-based, MPC and Oracle-MPC dispatch references and adds a post-hoc evaluation of simple non-learning controllers. Calibration materially improves classical-policy reliability: the B1*-HighBuffer variant records lower mean EENS than RLInv under Delayed and Extreme logistics and nearly identical EENS under Monsoon conditions. The feasible always-order-max controller also matches or improves RLInv's mean EENS in the reported scenarios. These findings bound the reliability contribution that can be attributed to learning and do not establish an economic optimum.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Changes in Thesis:}
+\begin{enumerate}
+  \item Added the controller taxonomy and comparison-fairness analysis (Section~\ref{sec:comparison_policies}; Table~\ref{tab:comparison_fairness}).
+  \item Added calibration and held-out evaluation of the classical replenishment baselines (Section~\ref{sec:calibrated_baselines}; Tables~\ref{tab:calibrated_baselines} and~\ref{tab:calibrated_baseline_orders}).
+  \item Added five non-learning controllers as supplementary diagnostics, including a feasible replenishment reference (Section~\ref{sec:null_controller_diagnostic}; Tables~\ref{tab:null_controller_comparison} and~\ref{tab:null_reliability_decomposition}).
+\end{enumerate}
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Comment 6 (Next Action Point 1):} Explore comparative performance of RL techniques.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Response:}
+
+The action point has been addressed by evaluating four RL controller configurations under the same held-out sites, logistics scenarios and episode horizon. The study reports final-policy EENS, control-action behaviour, statistical uncertainty and a separate checkpoint-level assessment of DQN and A2C training budgets. MaskablePPO was compared with the submitted unmasked PPO controller and the two additional RL algorithms. The reported conclusions are limited to the evaluated configurations and do not imply exhaustive hyperparameter optimisation or a definitive ranking across RL algorithm families.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Changes in Thesis:}
+\begin{enumerate}
+  \item Added four-controller EENS evaluation and paired exploratory comparisons (Section~\ref{sec:g4_rl_comparison}; Table~\ref{tab:g4_rl_ten_site}).
+  \item Reported differences in requested and feasible replenishment actions (Table~\ref{tab:g4_order_waterfall}).
+  \item Included the supplementary checkpoint comparison of DQN and A2C (Appendix~\ref{app:rl_training_budget}).
+\end{enumerate}
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Comment 7 (Next Action Point 2):} Investigate scalability limitations.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Response:}
+
+The revised thesis separates scalability into computational inference, training demand and cross-site generalisation. The measurements cover local CPU decision execution and limited training records; they do not include site communications, maintenance, embedded hardware benchmarking or coordinated control across multiple towers. The held-out-site study also identifies reliability differences at the more constrained site5, the prevalence of non-discriminating zero-EENS comparisons, and variability across limited training seeds. A separate target-site adaptation experiment does not show a reliable improvement from additional fine-tuning over the zero-shot parent in the tested conditions. These limits are documented rather than extrapolating the simulator results to deployment-scale performance.
+
+\vspace{\baselineskip}
+
+\noindent\textbf{Changes in Thesis:}
+\begin{enumerate}
+  \item Added computational measurements and training-workload discussion (Sections~\ref{sec:controller_computational_cost} and~\ref{sec:training_execution}).
+  \item Added held-out-site transfer, adaptation and variability analyses (Sections~\ref{sec:g5b_zero_shot}, \ref{sec:g5b_adaptation} and~\ref{sec:g5b_scalability_limits}).
+  \item Updated the thesis-wide critique and limitations (Section~\ref{sec:conclusion_limitations}).
+\end{enumerate}
+
+\end{flushleft}
