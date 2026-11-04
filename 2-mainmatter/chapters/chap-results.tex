@@ -247,8 +247,10 @@ The comparison above aggregates over all ten sites; it is worth
 checking that RLInv's advantage is not driven by a small number of
 sites while performing poorly elsewhere. Figure~\ref{fig:site_breakdown}
 reports RLInv and B1 mean EENS under normal logistics, computed
-separately for each site (each site's policy is trained and evaluated
-on that site individually), grouped by an independent difficulty
+separately for each site 
+(with site-specific RLInv training and
+site-specific B1 evaluation)
+, grouped by an independent difficulty
 classification (solar coverage, outage frequency, and battery
 autonomy; see Chapter~\ref{chap:datasets-setup},
 Section~\ref{sec:site_classification} for the classification
@@ -257,8 +259,9 @@ B1 at every site, among the largest absolute gains on the hardest
 (lowest-autonomy, highest-outage) sites, where B1's reactive ordering
 is least able to keep pace with demand. \begin{revisedblock}
 This is a per-site robustness check, not a test
-of generalisation to unseen sites: each policy
-in this comparison was trained for its own site.
+of generalisation to unseen sites: 
+RLInv was trained separately for each site,
+while B1 used its fixed rule at each site.
 Cross-site transfer without site-specific
 retraining is evaluated separately in
 Subsection~\ref{sec:g5b_zero_shot}.
@@ -268,8 +271,10 @@ Subsection~\ref{sec:g5b_zero_shot}.
 \centering
 \includegraphics[width=\textwidth]{fig_cross_site.png}
 \caption{Performance across sites with different operating
-characteristics: mean EENS (kWh/episode) for RLInv and B1, each
-trained and evaluated on its own site, normal logistics. X-axis label
+characteristics: mean EENS (kWh/episode) 
+for RLInv and B1 under Normal logistics,
+with site-specific RLInv training and fixed-rule B1 evaluation.
+X-axis label
 colour indicates the independent difficulty classification (green =
 Easy, orange = Medium, red = Hard).}
 \label{fig:site_breakdown}
@@ -316,12 +321,20 @@ provides a cleaner replenishment comparison than TrackB, but does not
 hold the dispatch architecture fully constant --- it does not isolate
 ``ordering'' as a standalone mechanism, since A6
 still learns its own dispatch policy, under a different action space
-than RLInv's joint action. The paired comparison is scenario-dependent rather than
-uniform: RLInv is significantly better under Normal ($p=0.0175$,
-$d_z=-0.92$) and Extreme ($p=0.00035$, $d_z=-1.76$, a large effect),
-the difference is negligible under Delayed ($p=0.83$, $d_z=-0.07$),
-and under Monsoon the comparison is not statistically distinguishable
-and nominally favours A6 ($p=0.41$, $d_z=+0.27$). The same qualitative
+than RLInv's joint action. 
+\revised{The paired differences vary by scenario.
+In unadjusted paired tests, RLInv has lower
+EENS under Normal ($p=0.0175$, $d_z=-0.92$)
+and Extreme ($p=0.00035$, $d_z=-1.76$).
+Applying Holm correction across the four
+H1 scenarios retains statistical significance
+under Extreme ($p_{\mathrm{adj}}\approx0.0014$)
+but not Normal ($p_{\mathrm{adj}}\approx0.0525$).
+Differences under Delayed ($p=0.83$,
+$d_z=-0.07$) and Monsoon ($p=0.41$,
+$d_z=+0.27$) are not statistically significant;
+the latter numerically favours A6.}
+The same qualitative
 pattern holds when restricted to the selected three-site sensitivity
 subset (site2, site5, and site7), so
 this is not an artefact of averaging across easier sites.
