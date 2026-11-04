@@ -146,19 +146,26 @@ effect of action masking
 
 \subsection{Why a unified agent (RLInv) alongside decomposed control?}
 
-Classical decomposed approaches use separate controllers for inventory
-ordering and energy dispatch. This ignores the bidirectional coupling: the
-dispatch controller depletes inventory, while inventory level constrains
-which dispatch actions are feasible. A unified agent can in principle
-exploit this coupling by jointly optimising both decisions from a single
-reward signal. Whether that benefit justifies the added learning complexity
-is the central empirical question (Hypothesis~H1). Two decomposed
-comparators test this: TrackB, where a calibrated $(s,S)$ rule handles
-ordering and a separately trained PPO agent handles dispatch; and A6, a
-cleaner variant that holds the dispatch architecture fixed and substitutes
-only the ordering mechanism (Section~\ref{sec:comparison_policies}). All
-architectures are trained and evaluated under identical conditions;
-neither outcome is assumed in advance.
+
+Classical decomposed approaches use separate controllers
+for inventory ordering and energy dispatch. These
+decisions are coupled: generator operation depletes
+diesel inventory, while available inventory constrains
+generator dispatch. RLInv addresses both decisions
+within one learned policy.
+
+Two decomposed configurations provide comparisons.
+TrackB combines an $(s,S)$ ordering rule with a
+separately trained PPO dispatch controller. A6 uses
+the same ordering rule but retrains dispatch with
+the full observation vector and a reduced two-action
+space, compared with RLInv's six-action joint space.
+
+These comparisons assess the implemented control
+configurations. The action-space and observation
+differences are documented alongside their results
+in Chapter~\ref{chap:results}.
+
 
 \subsection{Why a discrete action space?}
 
@@ -367,14 +374,15 @@ $-\infty$ before the softmax; the no-operation action is always feasible
 as a safe fallback. Post-step physical clipping (SoC and inventory to
 their bounds) provides a numerical backstop and contributes a small
 penalty term to the reward (Section~\ref{sec:reward_design}). No adaptive Lagrangian update was implemented.
-\revised{The ablation results in Chapter~\ref{chap:results}}
-are consistent with an architecture-dependent
-benefit from masking under stressed logistics when replenishment is
-externally managed, rather than masking acting primarily to eliminate
-constraint violations. The A6--TrackB comparison also differs in
-observation design (Section~\ref{sec:comparison_policies}), so this gap should not
-be attributed to masking alone; \revised{the RLInv--A7 comparison found no
-statistically significant mean-EENS difference.}
+
+\revised{The A6--TrackB comparison in
+Chapter~\ref{chap:results} records lower EENS
+for A6 under Monsoon and Extreme logistics.
+Masking and observation design both differ
+between these controllers. The separate
+RLInv--A7 comparison finds no statistically
+significant mean-EENS difference.}
+
 
 \subsection{Agent architecture and training}
 
@@ -633,20 +641,18 @@ development; it is not part of the primary comparison, as it did not
 alter the qualitative conclusions drawn from the persistence-forecast
 MPC baseline.
 
+
 \textbf{Oracle-MPC} uses the realised future load, solar-generation and
 grid-availability traces over the remaining evaluation horizon (perfect
 information) rather than a persistence estimate, and its planning
 horizon extends to the full 360-step evaluation episode rather than 24
 hours. Diesel ordering remains governed by the \revised{default} $(s,S)$ rule, and
-delivery timing remains stochastic. It is not a
-deployable policy; it exists to answer a specific diagnostic question: if
-the gap between RLInv and TrackB/MPC were explained purely by better
-forecasting or better dispatch optimisation, RLInv should not be able to
-match or approach a policy with \emph{perfect} forecasting and dispatch.
-Since RLInv's ordering is still learned rather than fixed, a persisting
-RLInv--Oracle-MPC gap in either direction is informative about whether
-the remaining advantage is attributable to ordering rather than dispatch
-quality (Chapter~\ref{chap:results}).
+delivery timing remains stochastic.
+\revised{Oracle-MPC serves as an optimistic dispatch
+reference. The comparison with RLInv evaluates
+performance relative to this reference while
+retaining the documented differences in
+replenishment and dispatch configurations.}
 
 \textbf{B0} is a rule-based heuristic: a fixed-threshold inventory
 policy using uncalibrated inventory thresholds, paired with threshold
@@ -816,7 +822,11 @@ Scenarios            & 4 (Normal, Delayed, Monsoon, Extreme) \\
 Policies evaluated   & 9 (B0, B1, MPC, Oracle-MPC, TrackB, A5, A6, A7, RLInv) \\
 Primary metric       & EENS (kWh per episode) \\
 Secondary metrics    & Diesel consumption, stockout events, orders placed, inventory trajectory \\
-Statistical unit     & Seed-level mean, paired across policies \\
+Statistical unit &
+\revised{Paired seed means for original H1--H3 tests;
+paired site means for expanded cross-site inference}
+\\
+
 \bottomrule
 \end{tabular}
 \end{table}
@@ -825,19 +835,24 @@ The evaluation archive also contains results for
 two additional variants, \texttt{multi} and
 \texttt{mpc\_forecast}.
 
-Statistical comparisons use the seed-level mean as the unit of analysis
-($n=10$ seeds per condition, or $n=100$ when pooling across all 10 sites
-$\times$ 10 seeds for the primary comparison). Hypothesis comparisons
-(H1, H2, H3) are assessed with a paired $t$-test on within-seed
-differences, since the same 10 seeds are evaluated under every policy
-(seed 42 under RLInv is matched against seed 42 under the comparator, not
-treated as an independent sample), with effect size reported as Cohen's
-$d_z$ (mean paired difference divided by the standard deviation of the
-paired differences). Because every policy was evaluated on identical
-site, scenario, and seed combinations, paired analysis provides greater
-statistical power than an independent-samples test by removing
-between-instance variability that is common to both policies being
-compared. A subset of three sites (site2, site5, site7) is
+
+\revised{The original H1--H3 hypothesis tests use
+paired training-seed means ($n=10$), with
+evaluation episodes averaged within each seed.
+The original RLInv--Oracle-MPC analysis also
+reported confidence intervals from 100
+site--seed observations. A subsequent reanalysis
+uses ten paired site-level means for cross-site
+inference, accounting for the shared site
+structure. The expanded four-algorithm
+comparison likewise uses ten paired site means
+after averaging training seeds and evaluation
+episodes within each site.
+
+The results and statistical units for these
+different experimental comparisons are
+reported in Chapter~\ref{chap:results}.}
+A subset of three sites (site2, site5, site7) is
 additionally used for finer-grained robustness checks in
 Chapter~\ref{chap:results} where a smaller, more tractable evaluation
 grid is needed (e.g.\ reward and tank-capacity sensitivity sweeps); this

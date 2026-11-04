@@ -306,26 +306,28 @@ Orders placed   & Count of accepted (post-mask, post-clip) non-zero
 \end{tabular}
 \end{table}
 
-The statistical unit of analysis is the seed-level mean: for each
-policy, site, and scenario, the 10 episode values within a seed are
-averaged to produce one observation per seed. Using the episode-level
-mean as the unit would be incorrect, since the 10 episodes within a seed
-share the same trained weights and are not independent observations of
-a random policy; the seed-level mean correctly treats each independently
-trained policy instance as one observation.
 
-Treating training seeds rather than evaluation episodes as the
-statistical unit avoids pseudo-replication arising from repeated
-rollouts of the same trained policy.
+The original H1--H3 hypothesis comparisons
+use paired training-seed means. Evaluation
+episodes are first averaged within each seed,
+and the corresponding seed-level results are
+compared across the trained policies. This
+avoids treating repeated episodes from the
+same learned model as independent training
+replicates.
 
-Hypothesis comparisons (H1, H2, H3, Chapter~\ref{chap:results}) are
-assessed with a paired $t$-test on within-seed differences, since every
-policy is evaluated on the same 10 seeds at the same 10 sites under the
-same 4 scenarios --- seed 42 under RLInv is matched against seed 42
-under the comparator, not treated as an independent sample. Effect size
-is reported as Cohen's $d_z$ (mean paired difference divided by the
-standard deviation of the paired differences). This paired design
-provides greater statistical power than an independent-samples test by
-removing between-instance variability common to both policies being
-compared, replacing the earlier pilot analysis based on three training
-seeds.
+The original RLInv--Oracle-MPC comparison
+was initially analysed using 100 site--seed
+observations. Its subsequent site-level
+reanalysis uses ten paired site means for
+cross-site inference. The expanded
+four-algorithm comparison also uses ten
+site-level paired means, averaging training
+seeds and evaluation episodes within each site.
+
+Thus, the original hypothesis tests and the
+expanded cross-site comparisons use the
+statistical units appropriate to their
+reported analyses. Paired tests and their
+results are presented in
+Chapter~\ref{chap:results}.
