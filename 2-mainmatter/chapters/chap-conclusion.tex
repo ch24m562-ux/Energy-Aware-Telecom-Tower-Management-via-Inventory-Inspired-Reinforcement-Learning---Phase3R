@@ -141,8 +141,10 @@ establish that learning that coordination provides additional
 reliability over a strong feasible rule.
 \end{revisedblock}
 
-\textbf{Action masking (H2).} A6 substantially outperforms TrackB
-under Monsoon and Extreme logistics. However, the comparison differs
+\textbf{Action masking (H2).} 
+A6 achieves lower mean EENS than TrackB
+under Monsoon and Extreme logistics.
+However, the comparison differs
 in both masking and observation design (Chapter~\ref{chap:methodology}), so the gap cannot be
 attributed to masking alone. The cleaner RLInv--A7 comparison, which
 retains the same observation and joint-control architecture, finds no
@@ -466,17 +468,16 @@ with a short-horizon solar forecast, available in practice from
 numerical weather prediction services, would let the agent anticipate
 low-PV periods rather than reacting to them, a natural complement to
 the delay-aware extension already explored on the ordering side.
-\textbf{Forecast-aware control.} Forecast-aware dispatch was also
-explored during the course of this research. Preliminary experiments
-incorporated short-term load and solar forecasts into the MPC
-baseline's dispatch planning, to test whether predictive information
-about future conditions would improve performance relative to
-persistence-based planning. Although this direction showed promise
-conceptually, it did not consistently improve operational performance
-within the scope of this study. This finding is consistent with RLInv's
-design choice of learning directly from the current system state rather
-than depending on external forecasts, though forecast-integrated
-reinforcement learning remains an interesting direction for future work.
+
+\textbf{Forecast-aware control.}
+An exploratory MPC variant (\texttt{mpc\_forecast})
+used a learned 24-hour forecasting module in place
+of persistence-based forecasts. The variant was
+evaluated but did not consistently improve
+operational performance under the tested conditions.
+Incorporating forecast information into RLInv
+remains a direction for future work.
+
 
 
 % ============================================================

@@ -143,8 +143,10 @@
 
 % \revised{...} -- INLINE. Safe in body text, table cells, captions,
 % headings and maths. Robust, so it survives moving into the .toc/.lof.
+
 \DeclareRobustCommand{\revised}[1]{%
-  \ifshowrevisions\textcolor{P3Rcolor}{#1}\else#1\fi}
+  \ifshowrevisions\begingroup\color{P3Rcolor}#1\endgroup\else#1\fi}
+
 
 % revisedblock -- BLOCK. Colours the text and draws a margin change bar
 % that survives line and page breaks. Use for whole paragraphs and for
