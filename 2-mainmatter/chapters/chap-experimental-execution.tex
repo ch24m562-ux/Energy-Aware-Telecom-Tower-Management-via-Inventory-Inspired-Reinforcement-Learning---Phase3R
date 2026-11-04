@@ -74,10 +74,11 @@ Table~\ref{tab:impl_sequence}.}
 \end{tabular}
 \end{table}
 
-The repository structure follows this layer ordering
-(\texttt{env/}, \texttt{baselines/}, \texttt{train/}, \texttt{eval/}),
-with all hyperparameters centralised in a single
-\texttt{config/hparams.yaml} and no magic numbers in training scripts.
+
+The implementation separates environment,
+baseline, training and evaluation modules.
+Core training hyperparameters are recorded in
+\texttt{src/config/hparams.yaml}.
 
 Several implementation decisions made during this build are documented
 in Chapter~\ref{chap:methodology}'s Implementation Deviations table
@@ -86,14 +87,12 @@ chapter records only decisions specific to \emph{how} the build was
 carried out, not \emph{what} was built.
 
 \begin{sloppypar}
-\paragraph{Parallel environment count.} The training configuration
-targeted eight parallel \texttt{SubprocVecEnv} workers. On the
-development machine, an OS limit on process handles caused intermittent
-failures at eight workers, so the count was reduced to four for all
-training runs. This roughly doubles wall-clock time per run but does not
-affect the PPO gradient estimate's statistical properties, since the
-effective batch size is preserved by scaling $n_{\text{steps}}$
-proportionally.
+\paragraph{Parallel environment count.}
+The training configuration initially targeted eight
+parallel \texttt{SubprocVecEnv} workers. Process-handle
+limits on the development machine required reducing
+this to four. The rollout length was adjusted to
+preserve the nominal batch size.
 \end{sloppypar}
 
 \paragraph{Observation normalisation synchronisation.} An early
@@ -111,14 +110,13 @@ corrected.
 \label{sec:training_execution}
 % ============================================================
 
-Table~\ref{tab:training_workload} summarises the training workload
-actually executed for the original Phase 3 campaign.
+Table~\ref{tab:training_workload} summarises the training workload of the original nine-policy evaluation
 
 \begin{table}[htb]
 \centering
 \small
 \setlength{\tabcolsep}{5pt}
-\caption{Total training workload, original Phase~3 campaign.}
+\caption{Total training workload, original nine-policy evaluation.}
 \label{tab:training_workload}
 \begin{tabular}{lrp{5.8cm}}
 \toprule
@@ -231,21 +229,27 @@ MPC, Oracle-MPC       & Added (Phase 3) & Not in the original plan;
 \end{tabular}
 \end{table}
 
+
 Two further policies (\texttt{mpc\_forecast}, a variant using a learned
 24-hour forecasting module, and \texttt{multi}, trained across a pool of
 scenarios rather than one at a time) were also implemented and
-evaluated during Phase 3 but are not part of the primary comparison, as
-neither altered the qualitative conclusions drawn from the nine-policy
+evaluated during development but are not part of the primary comparison,
+as neither altered the qualitative conclusions drawn from the nine-policy
 core set; they are excluded from Chapter~\ref{chap:results} for this
 reason.
 
+\revised{The exploratory \texttt{multi} controller
+used a separate nominal training budget of
+500{,}000 steps and is excluded from the
+five-policy training workload in
+Table~\ref{tab:training_workload}.}
 
 % ============================================================
 \section{Evaluation Execution}
 \label{sec:eval_execution}
 % ============================================================
 
-The original Phase~3 evaluation campaign comprises:
+The original evaluation archive comprises:
 \[
 9 \text{ policies} \times 10 \text{ sites} \times 10 \text{ seeds}
 \times 4 \text{ scenarios} \times 10 \text{ episodes} =
@@ -391,6 +395,7 @@ corresponding audited cohorts in
 Chapter~\ref{chap:results}.
 \end{revisedblock}
 
+
 % ============================================================
 \section{Statistical Framework}
 \label{sec:metrics}
@@ -431,16 +436,13 @@ Orders placed   & Count of accepted (post-mask, post-clip) non-zero
 
 
 
-\revised{The original H1--H3 hypothesis comparisons
-use paired training-seed means. For each policy,
-scenario and training seed, the ten evaluation
-episodes at each of the ten sites are averaged,
-followed by averaging across sites. This produces
-ten paired seed-level observations per scenario,
-rather than treating the 100 site--seed combinations
-or individual evaluation episodes as independent
-observations for these tests.}
 
+\revised{The original H1--H3 comparisons average
+evaluation episodes and sites within each
+training seed. This yields ten paired seed-level
+observations per scenario, rather than treating
+individual episodes or the 100 site--seed
+combinations as independent observations.}
 
 The original RLInv--Oracle-MPC comparison
 was initially analysed using 100 site--seed
