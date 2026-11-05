@@ -275,11 +275,11 @@ a regularity that a non-myopic RL policy can exploit.}
 \label{fig:grid_raster}
 \end{figure}
 
-Table~\ref{tab:outage_stats} quantifies outage structure per site.  The
-maximum observed outage duration is 16\,h across all sites.  This exceeds the
-24-h mean lead time of the normal logistics scenario, confirming that a single
-extended outage can deplete a partially-stocked tank before a delivery
-arrives --- the core failure mode the inventory-aware policy must prevent.
+Table~\ref{tab:outage_stats} quantifies outage structure per site.
+The maximum observed outage duration is 16\,h across all sites.
+During an extended outage, a partially stocked tank may become
+depleted before the next fuel delivery arrives, motivating
+explicit inventory-aware control.
 
 \begin{table}[htb]
 \centering
@@ -305,11 +305,11 @@ site10 & 52 & 13.4 & 16 & Medium \\
 \end{tabular}
 \end{table}
 
-Site~5 stands out with 52 outage events --- the highest frequency in the
-dataset --- combined with the lowest solar coverage and a small battery.
-This triple constraint makes it the most demanding test for any inventory or
-dispatch policy, and it is expected to be among the most informative sites
-in the experimental evaluation.
+Site~5 stands out with 52 outage events, tied with site~10
+for the highest count in the dataset, combined with low
+solar coverage and a small battery. These conditions make
+it one of the most demanding sites for inventory and
+dispatch control.
 
 
 % ============================================================

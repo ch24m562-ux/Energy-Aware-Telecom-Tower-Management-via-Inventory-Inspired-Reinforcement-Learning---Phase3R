@@ -19,9 +19,10 @@ This chapter synthesizes more than 35 high-impact works published between 2013 a
 The synthesis reveals a persistent and decisive gap:
 
 \begin{quote}
-\textbf{To the best of the author's knowledge, no prior work models diesel fuel
-at telecom towers as a finite, replenishable inventory with stochastic delivery
-delays, holding/shortage costs, and telecom-specific QoS-linked outage penalties.}
+\textbf{To the best of the author's knowledge, no prior work
+jointly models diesel fuel at telecom towers as a finite,
+replenishable inventory with stochastic delivery delays
+and explicit service-reliability constraints.}
 \end{quote}
 
 This thesis addresses this gap through an \textbf{inventory-inspired
@@ -108,7 +109,11 @@ These limitations motivate modelling diesel as a stochastic inventory process an
 
 \textbf{Relevance and limitations for this thesis:}
 \begin{itemize}
-    \item Provides a useful precedent for incorporating \emph{battery degradation constraints (SoC and DoD limits)} into reinforcement learning, complementing this thesis's explicit modelling of ageing and depth-of-discharge.
+    \item Provides a useful precedent for incorporating battery
+SoC and depth-of-discharge constraints into reinforcement
+learning. This is relevant to the SoC-bounded battery
+operation considered here; explicit battery ageing and
+degradation costs remain outside the implemented model.
     \item Illustrates how RL can coordinate \emph{energy state} (renewables, battery, grid price) with \emph{QoS-driven radio decisions}, supporting multi-objective reward design in telecom energy management.
     \item \textbf{Critical gap:} The system includes \emph{no diesel generator and no fuel logistics}. Energy supply is limited to solar and the grid; the environment contains no fuel inventory state, replenishment decisions, delivery lead times, or any stockout/forced-downtime risk.
     \item Battery ageing is represented only via hard constraints, not through explicit cycle/calendar degradation modelling; RL actions adjust radio resources rather than hybrid DG/battery/solar dispatch.
