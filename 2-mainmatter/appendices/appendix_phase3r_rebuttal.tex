@@ -26,8 +26,20 @@
 The examiners recorded that the analysis lacked breadth, that the work needed
 comparative analysis and scalability considerations, that a comparison across
 reinforcement-learning techniques would be valuable, and that a proper baseline
-method was missing. Each of these has been addressed by additional experiments
-rather than by additional discussion of the existing results.
+method was missing. To address these concerns, the study was extended through
+five targeted experimental investigations: calibration and
+held-out evaluation of classical baselines; comparison of
+four reinforcement-learning controllers across ten sites;
+evaluation of non-learning reference controllers;
+measurement of training and inference costs; and assessment
+of shared-policy transfer to held-out sites.
+
+Each investigation addressed a specific question raised
+in the examiner feedback. The resulting evidence was
+carefully evaluated against the original findings, leading
+to a reassessment of the initial conclusions and revisions
+where the new experimental results did not support
+the earlier interpretation.
 
 The most consequential revision concerns the baseline.
 The Phase 3 submission reported that RLInv had
@@ -35,7 +47,12 @@ the lowest mean EENS among the five primary
 reference policies (B0, B1, MPC, Oracle-MPC and
 TrackB) across all four logistics scenarios.
 The separate ablation controllers were not
-included in this ranking. The result was
+included in this ranking. Across the broader
+nine-policy core evaluation, the unmasked A7
+and fixed-ordering A6 configurations record
+numerically lower mean EENS than RLInv under
+Delayed and Monsoon logistics, respectively
+(Chapter~\ref{chap:results}). The result was
 interpreted as evidence for jointly learned
 replenishment. The examiners noted the
 absence of a properly calibrated baseline. The revised experiments
