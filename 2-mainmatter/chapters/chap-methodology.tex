@@ -156,7 +156,7 @@ within one learned policy.
 Two decomposed configurations provide comparisons.
 TrackB combines an $(s,S)$ ordering rule with a
 separately trained PPO dispatch controller. A6 uses
-the same ordering rule but retrains dispatch with
+\revised{the same $(s,S)$ policy class} but retrains dispatch with
 the full observation vector and a reduced two-action
 space, compared with RLInv's six-action joint space.
 
@@ -608,7 +608,16 @@ since ordering is handled externally), so "identical network" refers to
 matched hidden-layer capacity, not an identical input layer; this keeps
 the comparison focused on control structure rather than a confound from
 network size.
-
+\revised{\textbf{TrackB implementation limitation.}
+Source inspection identified a combined-action fallback in the
+original TrackB wrapper. When the requested generator--order
+combination is infeasible, the wrapper replaces the entire
+action with index zero (DG off, no order). This can cancel
+an otherwise feasible generator or ordering decision.
+The frequency and effect of this behaviour in the archived
+runs have not been established. TrackB is therefore retained
+as an archived configuration comparison, not as an isolated
+test of masking or dispatch architecture.}
 \begin{quote}
 \textbf{Implementation Note.} The reorder point covers estimated mean
 consumption over the expected delivery lead time, subject to lower and
@@ -686,6 +695,18 @@ re-learned under the smaller action space, A6 provides a cleaner ordering
 ablation than TrackB, which confounds ordering mechanism and dispatch
 architecture simultaneously; both comparisons are reported in
 Chapter~\ref{chap:results} for this reason.
+\revised{\textbf{A6--TrackB calibration limitation.}
+Both controllers were trained under Normal logistics
+and evaluated under the four delivery scenarios.
+During evaluation, TrackB constructs its classical
+ordering rule using the selected scenario's lead-time
+parameter. The current A6 factory does not explicitly
+map Extreme logistics and instead uses the Normal
+lead-time parameter for its analytical reorder threshold.
+Consequently, the two controllers cannot be assumed
+to use identical ordering thresholds under Extreme
+logistics. The effect of this difference on the
+archived EENS results has not been independently quantified.}
 
 \begin{table}[htb]
 \centering
