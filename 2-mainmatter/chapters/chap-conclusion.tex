@@ -126,19 +126,23 @@ verdict.
 
 \begin{revisedblock}
 \textbf{Joint replenishment and dispatch learning (H1).}
-The original RLInv--A6 ablation found lower RLInv EENS under
-Normal and Extreme logistics, but not a statistically
-distinguishable advantage under Delayed or Monsoon conditions.
-This is evidence for a configuration-dependent benefit of the
-unified learned controller over the tested decomposed learned
-dispatch configuration; the two also differ in dispatch action
-space. The later always-order-max result sharpens the
-interpretation: a non-learning rule jointly determines diesel
-dispatch and replenishment and matches or improves on RLInv's
-mean EENS. Thus, coordinating dispatch with replenishment is
-important in this environment, but the experiments do not
-establish that learning that coordination provides additional
-reliability over a strong feasible rule.
+The original RLInv--A6 comparison recorded lower mean
+EENS for RLInv under Normal and Extreme logistics.
+Only the Extreme difference remained statistically
+significant after Holm correction across the four
+scenarios. The controllers differ in dispatch action
+space, and the A6 analytical reorder threshold under
+Extreme uses the Normal lead-time parameter.
+The comparison therefore does not isolate the causal
+effect of learned replenishment.
+
+The subsequent always-order-max comparison provides
+a stronger qualification: a simple non-learning
+controller matches or improves on RLInv's mean EENS.
+The experiments establish the importance of coordinating
+dispatch and replenishment, but not an incremental
+reliability advantage from learning that coordination
+over the strongest evaluated simple rule.
 \end{revisedblock}
 
 \textbf{Action masking (H2).} 
@@ -146,28 +150,27 @@ A6 achieves lower mean EENS than TrackB
 under Monsoon and Extreme logistics.
 However, the comparison differs
 \revised{in masking, observation design and action handling,
-as well as Extreme-scenario ordering calibration}(Chapter~\ref{chap:methodology}), so the gap cannot be
+as well as Extreme-scenario ordering calibration} (Chapter~\ref{chap:methodology}), so the gap cannot be
 attributed to masking alone. The cleaner RLInv--A7 comparison, which
 retains the same observation and joint-control architecture, finds no
 statistically distinguishable mean-EENS effect from removing masking.
 The evidence therefore does not establish a universal independent
 performance benefit from masking, although masking remains the
-mechanism used to enforce action feasibility. The observed A6--TrackB
-gap is architecture-dependent and appears only under stressed
+mechanism used to enforce action feasibility. The observed A6--TrackB gap is configuration-dependent and appears only under stressed
 logistics.
 
-\textbf{Inventory observability (H3).} RLInv achieves numerically lower
-EENS than an ablation with inventory and ordering-history observations
-removed, in every scenario, but the difference never reaches
-significance (closest at Extreme, $p=0.058$). The result is interpreted
-cautiously. This may indicate that the remaining observations (battery
-state-of-charge, load, solar generation, grid availability, and
-time-of-day features) provide useful indirect information, or that the
-incremental contribution of the five removed channels is small under
-the tested conditions. Because the five removed logistics-related
-channels are removed together, the experiment does not isolate the
-contribution of inventory level from pending-order and
-ordering-history information.
+\revised{\textbf{Inventory observability (H3).}
+A5 retains the 11-dimensional observation interface
+but zeros five logistics-related channels.
+RLInv records numerically lower EENS in all four
+scenarios, without statistically significant
+differences (closest under Extreme, $p=0.058$).
+The exact historical A5 training-inventory
+initialisation has not been independently verified
+against RLInv's. Since five channels are zeroed
+together, the comparison does not establish the
+individual or isolated causal effects of inventory
+observability.}
 
 \subsection{Behaviour, robustness, and the exploratory extension}
 

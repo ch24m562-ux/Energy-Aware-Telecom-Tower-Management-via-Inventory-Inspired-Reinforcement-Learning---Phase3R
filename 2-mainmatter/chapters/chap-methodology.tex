@@ -368,22 +368,24 @@ as a safe fallback. Post-step physical clipping (SoC and inventory to
 their bounds) provides a numerical backstop and contributes a small
 penalty term to the reward (Section~\ref{sec:reward_design}). No adaptive Lagrangian update was implemented.
 
-\revised{The A6--TrackB comparison in
-Chapter~\ref{chap:results} records lower EENS
-for A6 under Monsoon and Extreme logistics.
-Masking and observation design both differ
-between these controllers. The separate
-RLInv--A7 comparison finds no statistically
-significant mean-EENS difference.}
+\revised{The archived A6--TrackB comparison records lower
+EENS for A6 under Monsoon and Extreme logistics.
+These controllers differ in masking, observation design
+and combined-action handling. Under Extreme logistics,
+their analytical reorder calibration also differs.
+The separate RLInv--A7 comparison finds no statistically
+significant mean-EENS difference
+(Chapter~\ref{chap:results}).}
 
 
 \subsection{Agent architecture and training}
 
-Figure~\ref{fig:rlinv_loop} shows the per-step decision loop RLInv
-executes at every timestep: \revised{the policy computes action logits, infeasible
-actions are masked, and a feasible action is sampled}, the environment steps forward, a
-reward is computed, and PPO uses that reward to update the policy over
-the course of training.
+Figure~\ref{fig:rlinv_loop} illustrates the RLInv
+decision loop: \revised{the policy computes action
+logits, applies feasibility masking and samples an
+action. The environment then advances and computes
+a reward. PPO updates the policy after collecting
+training rollouts.}
 
 \begin{figure}[htbp]
 \centering
@@ -701,7 +703,8 @@ rather than a perfectly controlled isolation of the ordering decision
 alone. In
 this variant the RL agent controls only generator commitment under a
 reduced \texttt{Discrete(2)} action space, while diesel ordering is
-handled by the same calibrated $(s,S)$ rule used in \revised{TrackB}. The observation space, reward function, and environment
+\revised{handled by a separately instantiated analytical
+$(s,S)$ rule from the same policy class as TrackB.} The observation space, reward function, and environment
 dynamics remain identical to RLInv. Because the dispatch policy is
 re-learned under the smaller action space, A6 provides a cleaner ordering
 ablation than TrackB, which confounds ordering mechanism and dispatch
@@ -753,7 +756,7 @@ Threshold rule &
 MPC &
 $(s,S)$ rule &
 MILP, $H{=}24$ &
-Persistence &
+\revised{Load/PV persistence; grid look-ahead} &
 Does optimal-but-myopic dispatch close the gap? \\
 Oracle-MPC &
 $(s,S)$ rule &
