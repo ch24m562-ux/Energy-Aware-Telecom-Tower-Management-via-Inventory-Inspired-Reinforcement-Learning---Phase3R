@@ -13,10 +13,12 @@ model predictive control
 
 Reliable and low-carbon energy management for hybrid telecom tower sites
 remains a critical challenge in regions with weak or intermittent electricity
-supply. Conventional rule-based controllers and offline optimisation
-approaches rely on fixed thresholds and deterministic assumptions,
-making them unable to adapt to stochastic solar generation, grid outages, and
-fuel logistics uncertainty.
+supply. \revised{Conventional rule-based and optimisation-based
+controllers offer practical energy-management
+approaches, but their performance depends on
+appropriate calibration, system assumptions
+and the representation of fuel replenishment
+uncertainty.}
 
 This thesis studies the operational control of hybrid
 solar--battery--diesel telecom tower systems under uncertainty in renewable
@@ -42,9 +44,12 @@ classical controllers, non-learning reference rules,
 alternative reinforcement-learning algorithms,
 computational cost, and cross-site generalisation.
 
+Within the original primary baseline comparison,
 RLInv achieves the lowest mean Expected Energy
-Not Served (EENS) within the original comparison
-set across all four logistics scenarios. However,
+Not Served (EENS) against B0, B1, MPC,
+Oracle-MPC and TrackB across all four logistics
+scenarios. The separate ablation controllers
+are not included in this ranking. However,
 the subsequent site-level RLInv--Oracle-MPC analysis
 does not establish statistically significant
 differences. In the RLInv--A6 ablation, the

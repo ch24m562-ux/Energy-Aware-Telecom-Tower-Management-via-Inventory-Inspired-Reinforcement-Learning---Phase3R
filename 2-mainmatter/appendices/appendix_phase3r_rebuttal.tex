@@ -29,10 +29,15 @@ reinforcement-learning techniques would be valuable, and that a proper baseline
 method was missing. Each of these has been addressed by additional experiments
 rather than by additional discussion of the existing results.
 
-The most consequential revision concerns the baseline. The Phase 3
-submission reported lower expected energy not served (EENS) for RLInv
-within its original comparison set and interpreted that difference as
-evidence for jointly learned replenishment. The examiners noted the
+The most consequential revision concerns the baseline.
+The Phase 3 submission reported that RLInv had
+the lowest mean EENS among the five primary
+reference policies (B0, B1, MPC, Oracle-MPC and
+TrackB) across all four logistics scenarios.
+The separate ablation controllers were not
+included in this ranking. The result was
+interpreted as evidence for jointly learned
+replenishment. The examiners noted the
 absence of a properly calibrated baseline. The revised experiments
 confirm that this limitation was material: the training-window-calibrated
 $(s,S)$ policy B1*-HighBuffer achieves lower mean EENS than RLInv under

@@ -61,9 +61,13 @@ protocols rather than pooled as a single matched experiment.
 \subsection{\revised{What the combined controller comparisons show}}
 
 \begin{revisedblock}
-Within the original comparison set, RLInv achieved the lowest
-mean Expected Energy Not Served (EENS) in all four logistics
-scenarios. The expanded comparisons qualify that result.
+Within the original primary baseline comparison
+against B0, B1, MPC, Oracle-MPC and TrackB,
+RLInv achieved the lowest mean Expected Energy
+Not Served (EENS) under all four logistics
+scenarios. The separate ablation controllers
+are not included in this ranking. The expanded
+comparisons qualify that result.
 Calibrated B1*-HighBuffer achieved lower mean EENS under
 Delayed and Extreme logistics, with a nearly identical mean
 under Monsoon. The supplementary always-order-max controller,
@@ -213,7 +217,6 @@ An exploratory extension (RLInv-DA)
 investigated whether explicit tracking of
 previously observed delivery delays improves
 replenishment decisions and service reliability
-relative to the base controller. Despite a verified, working mechanism (a
 correctly updating delay estimate under a persistent two-regime
 supplier model), the extension produced no consistent EENS improvement
 over RLInv on the narrower evaluation grid used for this exploratory
