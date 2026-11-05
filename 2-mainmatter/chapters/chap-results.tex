@@ -1,6 +1,6 @@
 \chapter{Experimental Results}
 \label{chap:results}
-\setlength{\emergencystretch}{1.5em}
+\setlength{\emergencystretch}{3em}
 
 % ============================================================
 \section{Experimental Overview}
@@ -444,13 +444,13 @@ $p=0.058$, still not significant at $\alpha=0.05$) (Figure~\ref{fig:ablation_h3}
 
 
 \revised{\textbf{Interpretation.}
-The archived A5 configuration recorded numerically
-higher mean EENS than RLInv in all four scenarios,
-without statistically significant paired differences.
-Because the five channels were zeroed together and
-the historical training initialization is not fully
-established, the comparison does not identify their
-individual causal contributions.}
+A5 recorded higher mean EENS than RLInv in all
+four scenarios, but none of the paired differences
+was statistically significant. Five observation
+channels were zeroed together, and historical
+training initialisation is not fully established.
+Their individual causal effects therefore remain
+unidentified.}
 
 
 \begin{figure}[htb]
@@ -830,16 +830,18 @@ rather than deferred as future work.
 \label{sec:calibrated_baselines}
 
 \begin{revisedblock}
-The classical $(s,S)$ controller was evaluated using
-three alternative threshold configurations:
-B1-Analytic and two calibrated variants,
-B1*-Deployable and B1*-HighBuffer (collectively B1*).
-B1-Analytic determines its reorder point from expected
-consumption over the assumed 24-hour Normal supplier
-lead time. The B1* parameters were calibrated
-separately for each site on days 1--45 under Normal
-delivery logistics, without using the test window for
-threshold selection.
+The classical $(s,S)$ controller was evaluated
+in three configurations: B1-Analytic,
+B1*-Deployable and B1*-HighBuffer. The latter
+two constitute the B1* variants.
+B1-Analytic determines its reorder point from
+expected consumption over the assumed 24-hour
+Normal supplier lead time.
+
+The B1* thresholds were calibrated separately
+for each site using days 1--45 under Normal
+delivery logistics. The held-out test window
+was not used for threshold selection.
 
 The calibration examined 503 candidate parameter pairs
 in total across ten sites (450 coarse-grid candidates

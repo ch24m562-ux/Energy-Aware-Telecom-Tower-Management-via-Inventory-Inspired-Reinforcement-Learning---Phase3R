@@ -50,6 +50,7 @@ strengthened comparisons. Section~\ref{sec:rebuttal_baselines} reports
 the revised evidence, and Section~\ref{sec:conclusion_results} presents
 the corresponding conclusions.
 
+\begin{sloppypar}
 The revised contributions are an inventory-coupled control formulation;
 an expanded benchmark against classical, optimisation-based,
 alternative-RL and non-learning controllers; and an empirical diagnosis
@@ -64,6 +65,7 @@ It does not prove that any replenishment policy is globally optimal.
 Chapter~\ref{chap:results} gives the quantitative analysis
 (Section~\ref{sec:null_controller_diagnostic}), and
 Section~\ref{sec:conclusion_limitations} discusses its scope.
+\end{sloppypar}
 
 \vspace{\baselineskip}
 
@@ -308,11 +310,14 @@ behaviour, and does not assert fleet-deployment scalability.
         (Section~\ref{sec:controller_computational_cost};
         Tables~\ref{tab:rl_computational_cost}
         and~\ref{tab:classical_computational_cost}).
-  \item Added the five-site zero-shot transfer and target-site adaptation
-        evaluations (Sections~\ref{sec:g5b_zero_shot}
-        and~\ref{sec:g5b_adaptation};
-        Tables~\ref{tab:g5b_zero_shot_sites}
-        and~\ref{tab:g5b_site5_adaptation}).
+  \item Added five-site zero-shot transfer and
+      target-site adaptation evaluations.
+      The methods are described in
+      Sections~\ref{sec:g5b_zero_shot}
+      and~\ref{sec:g5b_adaptation}.
+      Results are reported in
+      Tables~\ref{tab:g5b_zero_shot_sites}
+      and~\ref{tab:g5b_site5_adaptation}.
   \item Added the training-workload discussion
         (Section~\ref{sec:training_execution}) and the scalability limitations
         (Section~\ref{sec:g5b_scalability_limits}).
