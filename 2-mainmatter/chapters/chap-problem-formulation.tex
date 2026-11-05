@@ -4,9 +4,6 @@
 % ---------------------------------------------------------------
 \section{Chapter Overview and Notation}
 % ---------------------------------------------------------------
-\section{Chapter Overview and Notation}`. Replace from that `\begin{table}[ht]` through its matching `\end{table}` (includes `\label{tab:notation}`) with the following. Do not touch subsequent tables.
-
-```latex
 \begin{table}[htbp]
 \centering
 \small
@@ -155,7 +152,7 @@ dispatch is not an RL action.}
 \end{figure}
 
 The system comprises rooftop solar PV, a lithium iron phosphate (LFP) battery
-bank, intermittent grid supply, a diesel generator subject to a fixed rated-power limit
+bank, intermittent grid supply, a diesel generator \revised{subject to a fixed rated-power limit}
 $P_{\mathrm{rated}}^{\DG}$ when switched on, and a finite diesel tank
 replenished by external truck deliveries subject to stochastic lead times.
 $G_t \in \{0,1\}$ is a binary grid availability indicator; when $G_t = 0$ the
@@ -227,7 +224,7 @@ supplier lead times. Reinforcement learning provides one approach
 to selecting generator and replenishment actions without solving a
 fresh multi-period optimisation problem at every step. The implemented
 policy and its alternatives are detailed in Chapter~\ref{chap:methodology}.
-\end{revisedblock}.
+\end{revisedblock}
 
 % ---------------------------------------------------------------
 \section{State Space}
@@ -547,9 +544,7 @@ proposed controller must outperform its comparators.
 The comparative results and their limitations are given in
 Chapter~\ref{chap:results}.
 \end{revisedblock}
-Results for all three hypotheses are reported in Chapter~\ref{chap:results},
-and conclusions are drawn in Chapter~\ref{chap:conclusion} regardless of the
-direction of the findings.
+
 
 % ---------------------------------------------------------------
 \section{Research Objectives and Contributions}
