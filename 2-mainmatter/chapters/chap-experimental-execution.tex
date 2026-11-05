@@ -234,15 +234,23 @@ Two further policies (\texttt{mpc\_forecast}, a variant using a learned
 24-hour forecasting module, and \texttt{multi}, trained across a pool of
 scenarios rather than one at a time) were also implemented and
 evaluated during development but are not part of the primary comparison,
-as neither altered the qualitative conclusions drawn from the nine-policy
-core set; they are excluded from Chapter~\ref{chap:results} for this
-reason.
+because they represent separate exploratory configurations outside
+the original nine-policy core comparison; they are excluded from
+Chapter~\ref{chap:results} for this reason.
 
 \revised{The exploratory \texttt{multi} controller
 used a separate nominal training budget of
 500{,}000 steps and is excluded from the
 five-policy training workload in
 Table~\ref{tab:training_workload}.}
+
+\revised{In the complete eleven-policy archive,
+the exploratory \texttt{multi} controller records
+a slightly lower mean EENS than RLInv under
+Extreme logistics (53.451 versus 53.854\,kWh).
+However, the training conditions differ, and this
+numerical ranking does not establish superiority
+under matched training conditions.}
 
 % ============================================================
 \section{Evaluation Execution}
