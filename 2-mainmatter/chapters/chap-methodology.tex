@@ -110,18 +110,15 @@ evaluation.}
 
 \subsection{Why PPO rather than value-based methods?}
 
-The decision problem combines generator commitment and diesel ordering over
-long horizons (720-step training episodes). Value-based methods such as DQN
-enumerate $Q$-values for each action combination and have been reported to
-exhibit
-instability in long-horizon environments with stochastic
-dynamics~\citep{mnih2015humanlevel}. Proximal Policy Optimisation (PPO) was
-selected because its clipped
-policy updates have been widely used for stable training in stochastic
-control and energy-management
-applications~\citep{schulman2017proximal,perera2021application,zhang2021deep}.
-The choice also integrates directly with the action-masking implementation
-used in this work.
+\revised{PPO was initially selected for its clipped
+policy updates and compatibility with feasibility
+masking \citep{schulman2017proximal,perera2021application,
+zhang2021deep}. DQN \citep{mnih2015humanlevel} and A2C
+were subsequently evaluated as alternative reinforcement
+learning methods. The resulting controller comparisons
+are reported in Section~\ref{sec:g4_rl_comparison};
+the initial algorithm choice is not treated as evidence
+of PPO's superior reliability.}
 
 \subsection{Why MaskablePPO rather than penalty-based constraint handling?}
 
@@ -178,9 +175,9 @@ where non-myopic planning is most valuable.
 \subsection{Why a flat MLP rather than modular encoders?}
 
 
-\revised{With an 11-dimensional observation vector, separate actor and
-critic MLPs, each with two 256-unit hidden layers, provide sufficient
-representational capacity.} Modular domain-specific encoders introduce
+\revised{The implemented controller uses separate actor
+and critic MLPs, each with two 256-unit hidden layers,
+for the 11-dimensional observation.} Modular domain-specific encoders introduce
 additional architectural hyperparameters (encoder depth, output dimension,
 concatenation structure) whose benefits were not investigated in this work
 given the small observation dimensionality. The flat design simplifies
@@ -350,8 +347,11 @@ final design interpretable and non-redundant.
 
 \subsection{Safety handling}
 
-Safety is enforced through hard action masking applied at every step. Two
-rules are checked before the policy samples an action.
+\revised{For MaskablePPO controllers, feasibility masks
+are applied before action sampling. The simulator also
+blocks or clips infeasible requests, including those
+submitted by unmasked controllers. The following two
+rules govern DG activation and replenishment feasibility.}
 
 \begin{enumerate}
   \item \textbf{DG masking:} all actions with $\DG_t = 1$ are disabled if
@@ -380,8 +380,8 @@ significant mean-EENS difference.}
 \subsection{Agent architecture and training}
 
 Figure~\ref{fig:rlinv_loop} shows the per-step decision loop RLInv
-executes at every timestep: the policy proposes an action, infeasible
-actions are masked before sampling, the environment steps forward, a
+executes at every timestep: \revised{the policy computes action logits, infeasible
+actions are masked, and a feasible action is sampled}, the environment steps forward, a
 reward is computed, and PPO uses that reward to update the policy over
 the course of training.
 
@@ -393,8 +393,10 @@ the course of training.
               minimum width=3.2cm, minimum height=0.8cm, font=\small},
   >=Stealth
 ]
-\node[box] (order)   {Policy proposes\\action};
-\node[box, right=of order]   (mask)  {Action masking};
+\node[box] (order)
+  {\revised{Policy computes}\\\revised{action logits}};
+\node[box, right=of order] (mask)
+  {\revised{Mask and}\\\revised{sample action}};
 \node[box, right=of mask]    (env)   {Environment step};
 \node[box, below=of env]     (reward) {Reward computed};
 \node[box, left=of reward]   (ppo)    {PPO update};
@@ -426,7 +428,7 @@ seed-level paired comparisons reported in Chapter~\ref{chap:results}. A custom e
 \texttt{VecNormalize} statistics between the training and evaluation
 environments before each validation pass, preventing observation-scale
 mismatch. Training inventory was randomised over $[0.20,\,0.90]\,C^{\Tank}$
-so that the policy learns to manage from any starting inventory level;
+\revised{to expose the policy to varying initial fuel levels;}
 evaluation randomises initial inventory over $[0.3,\,0.9]\,C^{\Tank}$.
 
 A convergence check extended training to 560{,}000 steps on three
@@ -442,13 +444,17 @@ Table~\ref{tab:hyperparams} lists all training hyperparameters.
 \begin{table}[htb]
 \centering
 \small
-\caption{Training hyperparameters for RLInv and the TrackB dispatch agent.}
+\caption{\revised{PPO-family training configuration.
+RLInv, A5 and A6 use MaskablePPO; TrackB and A7
+use standard PPO.}}
 \label{tab:hyperparams}
 \begin{tabular}{p{3.8cm}p{4.8cm}p{4.4cm}}
 \toprule
 \textbf{Parameter} & \textbf{Value} & \textbf{Rationale} \\
 \midrule
-Algorithm              & MaskablePPO (\texttt{sb3-contrib}) & Hard feasibility masking \\
+Algorithm &
+\revised{MaskablePPO (RLInv/A5/A6); PPO (TrackB/A7)} &
+\revised{Pre-action masking for MaskablePPO only} \\
 Policy network
   & \revised{Separate actor and critic MLPs $[256,\,256]$, Tanh}
   & CPU-feasible capacity \\
@@ -625,25 +631,30 @@ upper clipping limits:
 $s_{\mathrm{norm}} = \mathrm{clip}(k_s \cdot \bar{D} \cdot \mathbb{E}[L]
 \,/\, C^{\Tank},\, 0.05,\,0.95)$ with safety multiplier $k_s=1$, and
 order-up-to level $S_{\mathrm{norm}} = \mathrm{clip}(0.85,\,
-s_{\mathrm{norm}}+0.10,\,0.95)$. \revised{This calibration is used by TrackB and A6; B1, MPC,
-and Oracle-MPC use fixed thresholds of $s=0.25$ and $S=0.85$.}
+s_{\mathrm{norm}}+0.10,\,0.95)$. \revised{The analytical rule is instantiated separately in
+TrackB and A6, subject to the Extreme-scenario calibration
+limitation discussed below. B1, MPC and Oracle-MPC use fixed
+thresholds of $s=0.25$ and $S=0.85$.}
 \end{quote}
 
-\textbf{MPC} pairs the \revised{default} $(s,S)$ ordering rule with a model-predictive
-dispatch controller: a receding-horizon MILP (solved via HiGHS,
-\texttt{scipy.optimize.milp}) re-optimised at every step over a
-24-hour planning horizon, using a persistence forecast (the current
-observation repeated across the horizon). A 24-hour horizon captures the
-daily solar and load cycle while requiring only 24 binary dispatch
-variables, keeping the MILP computationally small. MPC's battery--DG
-co-optimisation within the MILP is a mild optimistic bias relative to
-RLInv's greedy priority-rule battery dispatch, since the solver can plan
-battery and generator jointly where the simulator's own dispatch cannot;
-this is a documented, deliberate advantage given to the baseline. Under
-Extreme logistics, the expected delivery time lies far beyond the
-24-hour planning horizon (mean lead time 336\,h), limiting MPC's ability
-to account for replenishment within its current optimisation window ---
-the central structural limitation this comparison is designed to expose. A
+\revised{\textbf{MPC} combines default $(s,S)$ ordering
+with a receding-horizon mixed-integer linear programme
+solved using HiGHS (\texttt{scipy.optimize.milp}).
+The planning horizon is 24 hours. Load and solar
+generation use persistence forecasts, while future grid
+availability is read from the recorded site trace when
+available. The MILP contains 24 generator and 24 grid
+binary variables, together with continuous energy and
+state variables.
+
+The MILP plans battery and generator dispatch, but only
+the generator commitment and classical ordering decision
+are submitted to the environment. Actual battery dispatch
+continues to follow the simulator's fixed priority rule.
+The MPC therefore has additional grid information and
+a planning model that differs from executed dispatch.
+Its 24-hour horizon is shorter than the 336-hour mean
+delivery time under Extreme logistics.} A
 third variant using a learned 24-hour forecasting module in place of the
 persistence forecast was also implemented and evaluated during
 development; it is not part of the primary comparison, as it did not
@@ -673,15 +684,16 @@ compared with 0.15 in B0.}
 \textbf{A7} is vanilla PPO trained without action masking and serves as an
 unmasked comparator.
 
-\textbf{A5} removes five logistics/inventory-related channels via a
-\texttt{NoInvObsWrapper}: inventory level ($\Inv_t$), pending-delivery
-flag, pending quantity, elapsed time since ordering ($\tau_t$), and the
-remaining delivery-time channel ($H_t^{\mathrm{rem}}$); the remaining six dimensions
-(SoC, PV, load, grid, and the two cyclic hour-of-day features) are
-unchanged. This tests the combined contribution of inventory,
-pending-delivery, and ordering-history information; because five
-channels are removed together, their individual effects are not
-isolated.
+\revised{\textbf{A5} retains the 11-dimensional observation
+interface but zeros five logistics-related channels:
+inventory level, pending-order flag, pending quantity,
+elapsed time since ordering, and remaining delivery time.
+The other six channels remain available. The A5 training
+script permits initial-inventory settings different from
+RLInv's $[0.20,0.90]$ training range; the exact historical
+A5 invocation has not been independently verified.
+Accordingly, the archived comparison does not isolate
+the causal effect of inventory observability.}
 
 \textbf{A6} provides a cleaner ordering ablation while acknowledging
 that the dispatch policy is re-learned under a reduced action space,
@@ -933,6 +945,13 @@ two additional variants, \texttt{multi} and
 The statistical units used for the different
 comparisons are detailed in
 Section~\ref{sec:metrics}.
+\revised{The original controller comparisons use ten
+training seeds. The extended four-algorithm study uses
+five seeds, while cross-site generalisation uses three.
+Non-learning policies have evaluation seeds but no
+independently trained policy checkpoints. These cohorts
+are analysed separately and are not treated as one
+uniform training population.}
 A subset of three sites (site2, site5, site7) is
 additionally used for finer-grained robustness checks in
 Chapter~\ref{chap:results} where a smaller, more tractable evaluation
@@ -1051,9 +1070,7 @@ fleet-level coordination are not modelled.
 record delivery events, so every delay distribution used in this thesis
 --- including the lognormal and Weibull robustness checks
 (Chapter~\ref{chap:results}) --- is a parametric modelling choice, not
-one fitted to observed logistics records. This is stated here as a
-scope boundary, not revisited as a limitation each time the delay model
-is used elsewhere in this thesis.
+one fitted to observed logistics records. 
 
 The RLInv-DA extension (Chapter~\ref{chap:results}) addresses a related
 but distinct question --- whether a persistent, autocorrelated supplier

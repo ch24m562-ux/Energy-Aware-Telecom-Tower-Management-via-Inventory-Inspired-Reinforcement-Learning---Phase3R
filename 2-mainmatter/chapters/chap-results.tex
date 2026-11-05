@@ -349,18 +349,23 @@ Both controllers recorded zero hard violations.
 Because their dispatch action spaces also
 differ, this experiment does not isolate
 the causal effect of learned replenishment.}
+\revised{The current A6 implementation also uses the
+Normal lead-time parameter to calculate its analytical
+reorder threshold under Extreme logistics. The reported
+Extreme EENS difference and paired test are retained as
+results for the archived controller configurations, but
+cannot be attributed solely to jointly learned ordering.}
 
-
-For context, RLInv also differs from TrackB (classical $(s,S)$
-ordering paired with a \emph{separately trained} dispatch policy, a
-more confounded comparator than A6 since both ordering and dispatch
-architecture differ). This gap is large and consistent
-(Table~\ref{tab:primary_comparison}: e.g.\ 11.29 vs.\ 174.50\,kWh
-monsoon, 53.85 vs.\ 152.13\,kWh extreme), but because TrackB confounds
-two design differences at once, it is used below to examine
-masking-related architectural differences, with the observation-space
-confound stated explicitly, rather than as primary evidence for joint
-replenishment.
+\revised{The archived TrackB results provide a further
+configuration comparison. TrackB has substantially higher
+EENS under Monsoon and Extreme logistics
+(Table~\ref{tab:primary_comparison}). However, its
+combined-action fallback can cancel an otherwise feasible
+generator or order request. The frequency and impact of
+this behaviour in the archived runs have not been
+established. The observed gap is therefore not used to
+infer an isolated benefit from learned replenishment,
+masking or dispatch architecture.}
 
 \begin{figure}[htb]
 \centering
@@ -378,15 +383,14 @@ $p<0.001$, ns = not significant. Error bars: 95\% CI, $n=10$ seeds.}
 \label{sec:mechanism_h2}
 
 \textbf{Evidence.} A6 (masked dispatch) and TrackB (unmasked
-dispatch) share an identical classical $(s,S)$ ordering rule; A6 retains
+dispatch) \revised{use the same classical $(s,S)$ policy class}; A6 retains
 the full 11-dimensional observation while TrackB's dispatch agent uses a
 reduced 6-dimensional observation (Chapter~\ref{chap:methodology}), so
 this comparison differs in both masking and observation design, not
 masking alone. There is no meaningful difference
 under Normal or Delayed logistics (identical or not significant), but a
 very large, highly significant effect under Monsoon ($d_z=-10.2$,
-$p<0.0001$) and Extreme ($d_z=-4.6$, $p<0.0001$), both favouring the
-masked (A6) variant (Figure~\ref{fig:ablation_h2}). Separately, RLInv vs.\ A7 (vanilla PPO, no
+$p<0.0001$) and Extreme ($d_z=-4.6$, $p<0.0001$), \revised{both favouring A6 in the archived comparison}(Figure~\ref{fig:ablation_h2}). Separately, RLInv vs.\ A7 (vanilla PPO, no
 masking, using the same observation space and jointly
 learned ordering as RLInv, but a different
 initial-inventory training distribution)
@@ -394,39 +398,40 @@ shows no significant difference in any scenario
 ($|d_z|\leq 0.37$ throughout).
 
 
-\textbf{Interpretation.}
-A6 achieved lower EENS than TrackB under
-Monsoon and Extreme logistics. The comparison
-changes both action masking and observation
-design, so the measured difference cannot
-be assigned to masking alone. The separate
-RLInv--A7 comparison found no statistically
-significant mean-EENS difference, although
-the historical training-inventory distributions
-also differed. Both A6 and TrackB recorded
-zero hard constraint violations.
+\revised{\textbf{Interpretation.}
+A6 recorded lower mean EENS than TrackB under Monsoon
+and Extreme logistics. The comparison differs in masking,
+observation design and combined-action handling. Under
+Extreme logistics, the current ordering-calibration paths
+also differ. The measured difference therefore cannot
+be attributed to masking alone. The RLInv--A7 comparison
+found no statistically significant mean-EENS difference,
+although its historical training-inventory distributions
+were also different.}
 
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.85\textwidth]{fig_ablation_h2_v3.png}
-\caption{Action masking: A6 (masked) vs.\ TrackB (unmasked); the external
-$(s,S)$
-ordering policy is identical in both (observation design differs --- see
-text). Effect is large and significant under
-Monsoon/Extreme only. See text for why this is not interpreted as
-explaining the entire RLInv--TrackB gap, and for the separate,
-non-significant RLInv-vs-A7 comparison.}
+\caption{\revised{Archived A6--TrackB EENS comparison
+under four logistics scenarios. The controllers differ
+in masking, observation design, action handling and,
+under Extreme logistics, analytical reorder calibration.
+The observed differences are not an isolated estimate
+of the effect of action masking.}}
 \label{fig:ablation_h2}
 \end{figure}
 
 \subsection{Inventory observability}
 \label{sec:mechanism_h3}
 
-\textbf{Evidence.} A5 is trained identically to RLInv but with five
-logistics/inventory-related channels removed from its observation
-space (inventory level, pending-delivery flag, pending quantity,
-elapsed time since ordering, and the remaining delivery-time channel).
+\revised{\textbf{Evidence.} A5 uses the same
+11-dimensional observation interface as RLInv but
+zeros five logistics-related channels: inventory level,
+pending flag, pending quantity, elapsed time since
+ordering and remaining delivery time. The historical
+A5 training-inventory initialization has not been
+independently verified against RLInv's.}
 RLInv achieves numerically lower mean EENS than A5 in every
 scenario, but the paired differences are small and do not reach
 statistical significance under the final evaluation protocol
@@ -434,14 +439,14 @@ statistical significance under the final evaluation protocol
 $p=0.058$, still not significant at $\alpha=0.05$) (Figure~\ref{fig:ablation_h3}).
 
 
-\textbf{Interpretation.}
-Removing the five logistics-related observation
-channels increased mean EENS numerically
-across all four scenarios. None of the paired
-differences reached statistical significance.
-Because the channels were removed together,
-the experiment does not establish their
-individual contributions.
+\revised{\textbf{Interpretation.}
+The archived A5 configuration recorded numerically
+higher mean EENS than RLInv in all four scenarios,
+without statistically significant paired differences.
+Because the five channels were zeroed together and
+the historical training initialization is not fully
+established, the comparison does not identify their
+individual causal contributions.}
 
 
 \begin{figure}[htb]
@@ -449,8 +454,8 @@ individual contributions.
 \includegraphics[width=0.75\textwidth]{fig_ablation_h3_v3.png}
 \caption{Inventory observability: RLInv (observes tank fill fraction,
 pending-delivery status, and ordering-history channels) vs.\ A5
-(identical, these five logistics/inventory-related observations
-zeroed). RLInv is numerically lower in every scenario but the
+\revised{(five logistics-related observations zeroed;
+historical training conditions not independently matched)}. RLInv is numerically lower in every scenario but the
 difference does not reach significance ($p=0.058$ at closest, Extreme
 scenario). Error bars: 95\% CI, $n=10$ seeds.}
 \label{fig:ablation_h3}
@@ -1002,7 +1007,7 @@ procurement cost. The comparison is descriptive and post-hoc.}}
  & \revised{Random-order}          & \revised{2.802} & \revised{220.130} & \revised{2.105} \\
  & \revised{Always-order-max}      & \revised{2.517} & \revised{220.415} & \revised{2.041} \\
 \midrule
-\revised{Monsoon} & \revised{RLInv}              & \revised{11.287} & \revised{211.645} & \revised{1.970} \\
+\revised{Monsoon} & \revised{RLInv}              & \revised{11.286} & \revised{211.645} & \revised{1.970} \\
  & \revised{B1*-HighBuffer}       & \revised{11.282} & \revised{211.650} & \revised{1.829} \\
  & \revised{Random-order}          & \revised{10.566} & \revised{212.366} & \revised{1.966} \\
  & \revised{Always-order-max}      & \revised{9.891}  & \revised{213.041} & \revised{1.911} \\
@@ -1059,7 +1064,7 @@ isolated causal effects of learning.}}
 \revised{9.891} & \revised{51.745} \\
 \revised{RLInv} &
 \revised{0.019} & \revised{3.599} &
-\revised{11.287} & \revised{53.854} \\
+\revised{11.286} & \revised{53.854} \\
 \bottomrule
 \end{tabular}
 \end{table}
