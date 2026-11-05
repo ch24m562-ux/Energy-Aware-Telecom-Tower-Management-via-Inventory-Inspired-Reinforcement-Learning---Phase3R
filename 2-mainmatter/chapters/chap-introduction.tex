@@ -139,7 +139,7 @@ operational metrics, and deliberately includes a Model Predictive Control
 (MPC) baseline and a perfect-information Oracle-MPC reference alongside the
 reinforcement-learning comparators, so that the effects of replenishment
 learning, dispatch quality, forecasting, and action masking can be
-examined separately:
+compared under documented differences in control architecture, information access and training conditions:
 
 \begin{description}
   \item[H1 (Joint ordering).] Does joint learning of dispatch and diesel
@@ -286,8 +286,10 @@ Limitations arising from these choices include:
   \item Multi-site coordination and shared fuel logistics are not modelled.
   \item Integrated forecasting modules for load or solar are not learned jointly
   with the control policy.
-  \item The diesel generator is modelled at fixed rated power when ON; continuous
-  power setpoint control is left for future work.
+  \item \revised{Diesel-generator commitment is binary.
+Actual generation is limited by rated output and
+the residual load. Continuous generator power
+setpoint control is not learned.}
 \end{itemize}
 
 These aspects are identified as promising directions for future work.

@@ -365,34 +365,44 @@ classical comparison \\
 \subsection{\revised{Independent Verification Procedures}}
 
 \begin{revisedblock}
-The expanded evaluation incorporated checks separate
-from the training and performance-analysis procedures.
+\begin{revisedblock}
+The expanded experimental evaluation incorporated
+independent checks of physical feasibility, energy
+conservation and consistency of recorded outcomes.
 
-Energy-accounting checks examined simulator transitions
-and conservation relationships under the implemented
-dispatch rules. Historical baseline replay was used
-to check consistency with archived controller results.
+Physical-safety verification examined evaluation
+trajectories for operational bounds, action
+feasibility, masking consistency and energy-accounting
+errors. Deliberately perturbed test cases were used
+to assess whether the verification procedures detected
+specified violations.
 
-The physical-safety gate (PSG) independently examined
-native evaluation traces for physical bounds,
-action feasibility, masking consistency and recorded
-energy outcomes. Deliberately modified test cases
-served as negative controls to check whether the
-verification procedure detected specified violations.
+For the comparative reinforcement-learning study,
+the verification also examined policy checkpoints,
+observation-normalisation artifacts, training
+configurations, data provenance and matched
+evaluation conditions.
 
-The G4 evidence-comparability gate (ECG) examined
-checkpoint and normalisation artifacts, dataset
-and source fingerprints, matched evaluation keys
-and initial conditions. Its archived evidence records
-verified matching for the evaluated artifacts while
-identifying unresolved historical training-source
-and normalisation-provenance items.
+The saved historical RLInv and A7 checkpoints and
+normalisation artifacts were matched to their
+recorded experiment artifacts. Additional checks
+established that the saved observation-normalisation
+statistics were consistent with training-only
+updates and were not updated by held-out evaluation.
 
-These checks did not change the frozen controller
-weights or accepted evaluation outcomes. Verification
-results and PASS counts are reported only for the
-corresponding audited cohorts in
-Chapter~\ref{chap:results}.
+One historical reproducibility limitation remains:
+the exact source-code revision contemporaneous with
+the original A7 training cannot be independently
+established. This limits reconstruction of the
+original training process, but does not invalidate
+the verified checkpoint identity or the reproducibility
+of its recorded evaluation outcomes.
+
+Accordingly, the comparative results are interpreted
+as matched evaluations of the available controller
+configurations, rather than as fully controlled
+replications of every historical training condition.
+\end{revisedblock}
 \end{revisedblock}
 
 

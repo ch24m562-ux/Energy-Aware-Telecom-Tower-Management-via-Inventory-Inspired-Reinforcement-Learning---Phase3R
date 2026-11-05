@@ -617,8 +617,8 @@ matched hidden-layer capacity, not an identical input layer; this keeps
 the comparison focused on control structure rather than a confound from
 network size.
 \revised{\textbf{TrackB implementation limitation.}
-Source inspection identified a combined-action fallback in the
-original TrackB wrapper. When the requested generator--order
+\revised{The evaluated TrackB wrapper implements
+a combined-action fallback.} When the requested generator--order
 combination is infeasible, the wrapper replaces the entire
 action with index zero (DG off, no order). This can cancel
 an otherwise feasible generator or ordering decision.
@@ -715,8 +715,8 @@ Both controllers were trained under Normal logistics
 and evaluated under the four delivery scenarios.
 During evaluation, TrackB constructs its classical
 ordering rule using the selected scenario's lead-time
-parameter. The current A6 factory does not explicitly
-map Extreme logistics and instead uses the Normal
+parameter. The evaluated A6 implementation does
+not explicitly map Extreme logistics and instead uses the Normal
 lead-time parameter for its analytical reorder threshold.
 Consequently, the two controllers cannot be assumed
 to use identical ordering thresholds under Extreme

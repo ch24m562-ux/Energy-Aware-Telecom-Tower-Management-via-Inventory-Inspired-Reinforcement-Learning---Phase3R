@@ -91,8 +91,10 @@ components of the CMDP introduced in Chapter~\ref{chap:problem}.
 The dataset does not include diesel delivery logs, in-transit fuel records, or
 replenishment events.  Consequently, the delivery-pipeline variable $\Pipe_t$
 is generated synthetically within the simulator, as described in
-Chapter~\ref{chap:methodology}.  All other environment inputs are drawn
-directly from the processed site traces.
+Chapter~\ref{chap:methodology}.  \revised{Recorded load, solar and grid-availability
+data provide the primary exogenous inputs,
+while fuel logistics and selected operational
+parameters are modelled within the simulator.}
 
 
 % ============================================================
@@ -215,8 +217,9 @@ which other sites can be compared.
 \textbf{Battery capacity is not uniformly matched to load.}
 Despite having the highest outage frequency in the dataset, site~5 has only
 20.5\,kWh of battery storage --- less than high-load sites~2, 3, and~4 which
-carry 41\,kWh banks.  On site~5, diesel inventory is therefore a primary
-reliability lever even after battery dispatch is optimised.
+carry 41\,kWh banks.  \revised{On site~5, diesel availability is therefore
+an important reliability constraint under the
+simulator's fixed-priority battery dispatch.}
 
 
 % ============================================================
@@ -499,11 +502,13 @@ The dataset is well suited to the present study, but three limitations must
 be stated clearly.
 
 \textbf{No diesel logistics records.}
-The dataset provides load, solar, grid availability, and battery capacity, but
-not diesel delivery events, lead times, or fuel replenishment logs.  The
-delivery-pipeline component of the simulator is therefore synthetic.  This
-is the sole component of the simulation not grounded in the ITU data, and
-is clearly documented as such in Chapter~\ref{chap:methodology}.
+\revised{The dataset provides load, solar, grid and
+site-equipment information, but not observed diesel
+orders, delivery delays or fuel-inventory records.
+Replenishment dynamics, tank sizing and initial
+fuel stocks are modelled within the simulator.
+These quantities must not be interpreted as
+direct measurements from the ITU/Zindi dataset.}
 
 \textbf{Limited time horizon.}
 Each site contains 60 days of observations, covering a single operating
@@ -515,8 +520,12 @@ conditions rather than year-round operation.
 Absolute diesel tank capacity is not provided.  The assumption
 $C^{\Tank} = 72\bar{D}$ gives physically plausible values (approximately
 three days of full-load backup across all sites), but real tank sizes may
-differ.  Sensitivity to this assumption is partially captured by randomising
-initial inventory over $[0.3,\,0.9]\,C^{\Tank}$ during evaluation.
+differ.  \revised{The separate tank-capacity sensitivity
+experiment in Chapter~\ref{chap:results} evaluates
+five physical buffer sizes on the selected three-site
+subset. Randomising initial inventory tests a
+different source of variation: the initial tank
+fill level.}
 
 
 % ============================================================

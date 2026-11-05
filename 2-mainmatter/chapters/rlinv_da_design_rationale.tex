@@ -59,15 +59,16 @@
 
 % Column 1: reviewer comment through motivation
 \node[reviewer] (comment)
-    {Reviewer Comments \#9 / \#10\\[2pt]
-     \textit{``Track delivery delays; model a more realistic supply chain''}};
+    {Research Question: Delay-Aware Replenishment\\[2pt]
+     \textit{Can past delivery delays improve
+     diesel replenishment decisions?}};
 
 \node[problem, below=of comment] (iid)
     {Original environment: i.i.d.\ geometric delivery times\\[2pt]
      \textrightarrow\ Past delays carry no predictive information};
 
 \node[decision, below=of iid] (regime)
-    {\textbf{Comment \#9 response:} Two-state Markov supplier\\[2pt]
+    {\textbf{Supplier model:} Two-state Markov regime\\[2pt]
      Normal $\leftrightarrow$ Disrupted (persistent disruptions)\\
      Disrupted mean $= 2\times$ normal mean};
 
@@ -77,7 +78,7 @@
 
 % Column 2: response through evaluation
 \node[decision, right=of comment, xshift=14mm] (ewma)
-    {\textbf{Comment \#10 response:} EWMA lead-time estimator\\[2pt]
+    {\textbf{Delay-history observation:} EWMA estimator\\[2pt]
      $\hat{L}_{t} = \alpha \cdot L^{\text{realised}}_t + (1-\alpha)\cdot\hat{L}_{t-1}$, \quad $\alpha = 0.3$\\
      No future leakage; uses only past observations};
 
@@ -103,9 +104,11 @@
 % Conclusion: full-width band beneath both columns
 \node[conclusion, below=15mm of evidence, xshift=-41mm] (conclusion)
     {Conclusion\\[2pt]
-     The existing RLInv observation space (inventory, pipeline, pending
-     orders) was already sufficiently informative. EWMA did not provide
-     additional useful signal under the evaluated supplier-regime model.};
+     No consistent EENS improvement from EWMA.
+ Existing state information may overlap with
+ the delay estimate, or the added signal may
+ have limited predictive value under the
+ evaluated supplier model.};
 
 % Arrows
 \draw[arr]  (comment)     -- (iid);
@@ -120,13 +123,14 @@
 
 \end{tikzpicture}%
 }
-\caption{Research design rationale for the RLInv-DA exploratory extension
-(Reviewer Comments~\#9 and~\#10). The diagram shows the reasoning chain
-from reviewer feedback (left column) through experimental design and
-evaluation (right column) to conclusion. The neutral result is
-scientifically valid because it is explained by information redundancy:
-the existing inventory and pipeline state representation already
-captures the information that EWMA-based delay estimation provides
-under the evaluated supplier-regime model.}
+\caption{Experimental design of the RLInv-DA
+delay-aware extension. A persistent two-state
+supplier model introduces temporal dependence in
+delivery delays. An EWMA-based delay estimate is
+added to the controller observation and evaluated
+against a matched base policy. The additional
+observation does not produce a consistent
+reliability improvement under the evaluated
+supplier-regime model.}
 \label{fig:rlinv_da_rationale}
 \end{figure}

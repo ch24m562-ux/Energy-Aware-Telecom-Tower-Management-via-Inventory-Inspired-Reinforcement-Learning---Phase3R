@@ -26,8 +26,11 @@ battery operating constraints and diesel inventory dynamics, including diesel re
 
 A data-grounded simulation environment is developed using the ITU~2024
 Smart Energy Scheduling dataset, comprising operational traces from ten
-telecom base station sites at hourly resolution. Reinforcement learning
-policies are trained with hard action masking that prevents infeasible control actions at each decision step.
+telecom base station sites at hourly resolution. \revised{The proposed RLInv controller uses hard
+action masking to exclude infeasible actions before
+selection. Unmasked reinforcement-learning
+configurations are evaluated separately as
+comparators.}
 
 \begin{revisedblock}
 The original evaluation compares RLInv with eight

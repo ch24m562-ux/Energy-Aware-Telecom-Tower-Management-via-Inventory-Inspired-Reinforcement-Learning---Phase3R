@@ -683,18 +683,22 @@ delivery disruption. This is reported as an identified limitation
 rather than resolved, and, given the narrower evaluation grid used
 here, is not generalised beyond the three sites tested.
 
-\subsection{RLInv-DA: exploratory extension motivated by reviewer feedback}
+\subsection{\revised{RLInv-DA:
+Exploratory Delay-Aware Extension}}
 \label{sec:rlinv_da}
 
-Reviewer feedback received during the Phase~2 evaluation raised two
-related questions: whether the diesel supply chain could be modelled
-more realistically, including vendor-side considerations, and whether
-the reordering strategy could track and
-predict delivery delays rather than treating each delivery as an
-independent random event. This subsection reports an
-exploratory extension, RLInv-DA, introduced to investigate delay
-awareness within the stated single-vendor abstraction, without altering the main
-results reported in Sections~\ref{sec:primary_comparison}--\ref{sec:mechanism}.
+This experiment investigates whether
+explicit information about previously observed
+diesel-delivery delays can improve replenishment
+decisions. The original geometric lead-time
+model treats deliveries as independent events,
+providing limited predictive information from
+past delays. A supplementary environment with
+persistent supplier-disruption regimes was
+therefore developed to evaluate whether
+delay-history information offers an incremental
+benefit to the learned controller.The extension is evaluated separately from the
+primary controller comparisons.
 
 RLInv-DA extends RLInv with a single additional observation,
 $\widehat{L}_t$, an exponentially weighted moving average of realised
@@ -814,9 +818,13 @@ under a controlled supplier-regime model designed specifically to
 give such estimation a genuine opportunity to help, the mechanism was
 implemented, verified, and evaluated, and found to provide no
 consistent additional benefit beyond the information already available to RLInv
-through its existing inventory and pipeline state. This is reported as
-a completed finding addressing the underlying reviewer feedback,
-rather than deferred as future work.
+through its existing inventory and pipeline state. The experiment therefore establishes
+that the additional EWMA-based observation did
+not yield a consistent reliability improvement
+under the evaluated supplier-regime model.
+The results do not separately establish whether
+this is due to redundancy with existing observations
+or limited predictive value of the estimator.
 
 \input{2-mainmatter/chapters/rlinv_da_design_rationale.tex}
 
@@ -1661,12 +1669,11 @@ updates to sites~4, 5, 6, 9, and 10. For each trained seed and held-out
 site, evaluation used days~46--60, four delivery scenarios, and ten
 360-hour episodes per scenario, with initial inventory sampled from
 30--90\% of tank capacity. This produces 15 evaluation jobs and 600
-episodes. The independent native physical-safety gate (PSG) reports
-15/15 PASS, including 216,000 checked step traces and 60 deliberate
+episodes. The independent native Independent physical-safety checks passed for all 15 evaluation jobs, including 216,000 checked step traces and 60 deliberate
 negative controls. The comparator is a historical site-specific RLInv
 controller trained on that target site for a nominal 400,000 steps.
 Only the matched three-seed subset (42, 123, 777) is used here,
-not the five-seed G4 or ten-seed original results. Its episode keys and
+not the five-seed four-algorithm comparison or ten-seed original results. Its episode keys and
 initial inventories were matched, but it retains
 the historical training-provenance qualifications discussed in the
 experimental-integrity section. The same initial state does not require
@@ -1683,7 +1690,7 @@ RLInv trained for 400k steps: mean EENS (kWh per 360-hour
 held-out episode). Each site/scenario mean averages the same
 three training seeds (42, 123, 777) and ten episodes per seed.
 The local column is the historical three-seed subset, not the
-original ten-seed or G4 five-seed aggregate. S denotes shared zero-shot;
+original ten-seed or five-seed four-algorithm aggregate. S denotes shared zero-shot;
 L denotes local site-specific 400k. Normal-scenario EENS is
 zero for both controllers at all five sites.}}
 \label{tab:g5b_zero_shot_sites}
@@ -1757,8 +1764,7 @@ started afresh from the same-seed shared 400k parent; it was not
 successively continued from the 50k target checkpoint. Actual
 rollout-aligned counts were 57,344 and 106,496 steps for the short
 budgets. Evaluation used the same four scenarios and ten matched
-held-out episodes per seed/scenario. All 24 job-level native PSG
-reports passed (960 episodes, 345,600 evaluated hourly steps).
+held-out episodes per seed/scenario. Independent physical-safety checks passed for all 24 evaluation jobs (960 episodes, 345,600 evaluated hourly steps).
 
 This design matches \emph{additional target-site interactions}, not
 \emph{total training interactions}. Fine-tuned policies benefit from
@@ -1867,12 +1873,10 @@ Subsection~\ref{sec:calibrated_baselines} use site-specific threshold
 selection, whereas the shared RLInv model receives no target-site
 training. To address this difference in information access, a further
 \emph{exploratory, post-outcome-motivated} comparison selected one
-common $(s,S)$ configuration using \emph{only} the five G5b source
-sites, and then applied it unchanged across the five held-out sites.
-This supplementary design was motivated after inspecting the earlier
-G5b outcomes and is not presented as a preregistered primary test.
+common $(s,S)$ configuration using \emph{only} the five source sites used for shared-policy training, and then applied it unchanged across the five held-out sites.
+This supplementary design was motivated after inspecting the earlier shared-policy evaluation results and is not presented as a preregistered primary test.
 The source-only calibration reused 45 coarse $(s,S)$ candidates
-from the existing G3 calibration records, restricted to source-site
+from the earlier classical-baseline calibration results, restricted to source-site
 training-window results. The held-out sites were not used to select
 parameters. B1-Original uses $(s,S)=(0.25,0.85)$;
 B1-Shared-Deployable uses $(0.45,0.95)$; and
@@ -1880,8 +1884,7 @@ B1-Shared-HighBuffer uses $(0.65,0.95)$.
 
 The three classical configurations each generated 15 matched
 held-out evaluation jobs over the five sites and three evaluation
-seed blocks, for 45 jobs and 1,800 episodes. All 45 native PSG
-reports passed. Shared RLInv's earlier 15 PSG reports also passed
+seed blocks, for 45 jobs and 1,800 episodes. ndependent physical-safety checks passed for all 45 evaluation jobs. Shared RLInv's earlier 15 PSG reports also passed
 on independent reinspection. Threshold calibration and policy
 training do not have equal computational cost, and the controllers
 differ in decision logic; this is a fairer \emph{source-data-access}
@@ -1996,8 +1999,7 @@ evaluation population or remove a valid result. A common
 separate evaluation seed (424242) also showed substantial
 between-policy variation; however, using the same evaluation seed
 does not force identical supplier-event paths when actions differ.
-Ten new-seed own-evaluation PSG checks and thirteen common-evaluation
-PSG checks passed. This extension is descriptive: no additional
+Independent physical-safety checks passed for all ten new-seed evaluations and thirteen common-seed evaluations. This extension is descriptive: no additional
 matched FineTune50 policies were trained for the ten new seeds,
 and it cannot be used to upgrade the original three-seed
 fine-tuning comparison to a thirteen-seed paired study.
