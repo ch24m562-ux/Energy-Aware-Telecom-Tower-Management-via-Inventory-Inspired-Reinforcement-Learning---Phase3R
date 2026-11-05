@@ -8,9 +8,8 @@ and~\ref{sec:rationale}), the environment implementation
 (Section~\ref{sec:env_impl}), the reward design and its justification
 (Section~\ref{sec:reward_design}), the full comparison-policy set
 (Section~\ref{sec:comparison_policies}), the experimental protocol
-(Section~\ref{sec:evaluation_protocol}), and the deviations between the
-formal model and what was actually built
-(Section~\ref{sec:impl_deviations}).
+(Section~\ref{sec:evaluation_protocol}), \revised{and a summary of the implemented configuration and
+scope limitations (Section~\ref{sec:impl_deviations}).}
 
 % ============================================================
 \section{Methodology Overview}
@@ -254,7 +253,7 @@ s_t = \bigl[
   \sin(2\pi h_t/24),\;
   \cos(2\pi h_t/24),\;
   \tau_t,\;
-  R_t
+  H_t^{\mathrm{rem}}
 \bigr].
 \end{multline}
 The pending-delivery state uses a binary flag (order in transit?) and a
@@ -264,7 +263,7 @@ Chapter~\ref{chap:problem} under the single-outstanding-order constraint.
 Two further channels complete the 11-dimensional vector. \texttt{hours\_since\_order\_n}
 ($\tau_t$) is the elapsed time since the last order was placed,
 resetting to zero whenever a new order is issued; it is active in the
-standard experiments. \texttt{delivery\_remaining\_n} ($R_t$) is present
+standard experiments. \texttt{delivery\_remaining\_n} ($H_t^{\mathrm{rem}}$) is present
 in the observation vector but zero in the principal geometric,
 no-ETA campaign reported throughout this thesis; it exists for
 compatibility with a separate lognormal-forecast extension outside the
@@ -272,9 +271,9 @@ primary scope of this work. RLInv-DA (Chapter~\ref{chap:results})
 additionally adds an EWMA delay estimate as a twelfth channel, producing
 a 12-dimensional observation for that exploratory extension only.
 Hour-of-day is encoded as sine--cosine features so that hours~23 and~0 are
-adjacent in feature space. Grid availability $G_t$ is treated as an
-exogenous stochastic signal derived from the site time series rather than
-a decision variable. All continuous features are normalised online using
+adjacent in feature space. \revised{Grid availability is exogenous: the principal evaluation uses
+the recorded site series, while a separate robustness experiment
+samples grid outages from a fitted stochastic model.} All continuous features are normalised online using
 \texttt{VecNormalize}; statistics are frozen before evaluation.
 
 \subsection{Action space, battery rule, and inventory}
@@ -295,13 +294,6 @@ $\DG_t \in \{0,1\}$ and $Q_t \in \{0,\;0.30\,C^{\Tank},\;0.60\,C^{\Tank}\}$
 --- order quantities are expressed as a percentage of tank capacity rather
 than a fixed litre value, so that the same action encoding applies
 consistently across sites of different sizes.
-
-\begin{quote}
-\textbf{Implementation Note.} This differs from the fixed-litre order
-quantities described in Chapter~\ref{chap:problem}'s formal action space
-(Equation~\ref{eq:action}); the tank-relative encoding used here is the
-one actually implemented and evaluated throughout this thesis.
-\end{quote}
 
 Battery
 dispatch is not a learnable action; it is determined by a fixed
@@ -489,7 +481,7 @@ r_t =
 -\alpha \dfrac{E_t^{\DG}}{\bar{D}}
 -\beta  \dfrac{E_t^{\Grid}}{\bar{D}}
 -\lambda \dfrac{U_t}{\bar{D}}
--\gamma_r\,\mathbb{I}\!\bigl[U_t>0 \wedge \Inv_t=0\bigr]
+-\gamma_r\,\mathbb{I}\!\bigl[U_t>0 \wedge \Inv_t^{\mathrm{postDG}}=0\bigr]
 -\mu\,V_t,
 \]
 where $E_t^{\DG}$ is diesel energy consumed, $E_t^{\Grid}$ is grid energy
@@ -498,10 +490,15 @@ penalty triggered by a stockout coinciding with an active load shortfall,
 and $V_t$ indicates a physical-clipping event (SoC or inventory bound
 violation caught by the post-step numerical backstop). Dividing all
 energy terms by the site mean hourly load $\bar{D}$ normalises the signal
-to a comparable scale across sites of different size. The implemented
-reward is a shaped approximation of the economic cost objective defined
-in Chapter~\ref{chap:problem}; monetary cost components such as ordering
-cost, holding cost, and carbon cost are not explicitly represented.
+to a comparable scale across sites of different size. \revised{Here $\Inv_t^{\mathrm{postDG}}$ denotes on-site fuel
+remaining after generator dispatch and before any pending delivery is
+processed. The stockout flag is raised when this quantity is zero
+and unmet load is positive.}
+
+\revised{This is the implemented objective defined in
+Chapter~\ref{chap:problem}, with reward equal to negative step cost.
+Order-placement, ordered-volume, inventory-holding,
+battery-degradation and carbon costs are not explicit terms.}
 
 \textbf{Note on notation.} The stockout-cliff coefficient $\gamma_r$ is
 unrelated to the PPO discount factor $\gamma$ used elsewhere in this
@@ -938,75 +935,62 @@ under identical experimental settings.
 
 
 % ============================================================
-\section{Implementation Deviations from the Formal Model}
+% Do not use \revised in the PDF string argument of \texorpdfstring
+\section{\texorpdfstring{\revised{Implemented Configuration and Scope}}{Implemented Configuration and Scope}}
 \label{sec:impl_deviations}
-% ============================================================
 
-\subsection{Deviations from the formal CMDP}
+\subsection{\texorpdfstring{\revised{Configuration and modelling limits}}{Configuration and modelling limits}}
 \label{sec:deviations_table}
 
-Although the implementation follows the CMDP formulation of
-Chapter~\ref{chap:problem} closely, several practical simplifications
-were adopted to enable stable training within the available CPU budget.
-Table~\ref{tab:deviations} summarises the main differences
-between the formal CMDP and the implemented system.
-
-\begin{table}[htb]
+\begin{revisedblock}
+Table~\ref{tab:deviations} consolidates the implemented
+controller and the modelling limits relevant to interpreting
+the results. Earlier design choices are not treated as
+features of the implemented model.
+\end{revisedblock}
+\begin{table}[htbp]
 \centering
-\small
-\caption{Deviations between the formal CMDP (Chapter~\ref{chap:problem})
-and the implemented system.}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\ifshowrevisions\color{P3Rcolor}\fi
+\caption{Implemented control design and limitations.}
 \label{tab:deviations}
-\begin{tabular}{p{2.8cm}p{4.6cm}p{4.6cm}}
+\begin{tabularx}{\textwidth}{p{2.3cm}X X}
 \toprule
-\textbf{Aspect} & \textbf{Formal model} & \textbf{Implementation} \\
+\textbf{Aspect} & \textbf{Implemented configuration} & \textbf{Scope or limitation} \\
 \midrule
-Battery control
-  & $P_t^{\Bat}$ included in CMDP action space
-  & Fixed energy-priority rule; not an RL decision \\[4pt]
-Action space
-  & Hybrid continuous $+$ discrete; order quantity a fixed litre value
-  & Discrete 6-action encoding; order quantity expressed as \{0, 30\%,
-    60\%\} of tank capacity rather than a fixed litre amount \\[4pt]
-Pipeline representation
-  & Single scalar $\Pipe_t$ (quantity in transit)
-  & Represented as a flag $+$ quantity pair (two observation
-    dimensions) rather than a single scalar; mathematically
-    equivalent since at most one order is ever in transit \\[4pt]
-Discount factor
-  & $\gamma = 0.995$ (effective horizon $\approx$\,200\,h)
-  & $\gamma = 0.99$ (effective horizon $\approx$\,100\,h; sensitivity to
-    this choice is tested directly in Chapter~\ref{chap:results}) \\[4pt]
+Control actions
+& Six DG ON/OFF and tank-relative ordering combinations
+& No continuous battery action or fixed-litre ordering \\[3pt]
+Battery dispatch
+& Fixed PV--grid--battery--DG supply priority
+& Not jointly learned or economically co-optimised \\[3pt]
+Inventory and orders
+& kWh-equivalent fuel stock; one pending order; geometric lead times in main campaign
+& Supplier delivery observations are simulated \\[3pt]
+DG constraint
+& Fuel-start reserve of 2.4 rated-output hours
+& No enforced two-hour continuous ON-time \\[3pt]
+Discount
+& $\gamma=0.99$
+& A 336-step-delayed outcome has weight about $0.034$ \\[3pt]
 Reward
-  & Economic cost decomposition (monetary)
-  & Shaped normalised scalar (Section~\ref{sec:reward_design}) \\[4pt]
-Safety mechanisms
-  & Masking $+$ recovery $+$ Lagrangian
-  & Masking $+$ physical clipping only \\[4pt]
-\revised{Battery coefficients}
-  & Conventional charge/discharge efficiency interpretation
-  & \revised{Site-data coefficients 0.35 and 1.20;
-    implemented discharge uses division by 1.20,
-    differing from the source scoring convention} \\[4pt]
-\revised{DG minimum ON-time}
-  & Two-hour minimum continuous ON-time
-  & \revised{Fuel-start reserve equivalent to 2.4 rated
-    output hours; no enforced ON-time latch} \\[4pt]
-\revised{Tank and reward scaling}
-  & Fixed tank parameter and mean-load reference
-  & \revised{$C^{\Tank}=72\bar{D}$ and reward
-    denominator $\bar{D}$ recomputed from each
-    supplied data slice} \\[4pt]
-Neural architecture
-  & Modular domain-specific encoders
-  & \revised{Separate actor and critic MLPs with
-    $[256,\,256]$ hidden layers and Tanh activations} \\[4pt]
-Training budget
-  & 576{,}000 steps (script default)
-  & 400{,}000 steps (final run); convergence check extended training to
-    560{,}000 steps confirming plateau \\
+& Normalised diesel, grid and unmet-load penalties plus stockout and violation indicators
+& No explicit order-placement, volume, holding, degradation or carbon costs; unmet load has weight $\lambda=100$ \\[3pt]
+Action feasibility
+& Action masking with simulator blocking and clipping
+& No Lagrangian or learned recovery controller \\[3pt]
+Battery coefficients
+& Site-data charge/discharge coefficients; implemented discharge uses division by the coefficient
+& Coefficients do not all follow conventional physical-efficiency interpretation \\[3pt]
+Tank and scaling
+& $C^{\Tank}=72\bar D$; $\bar D$ is computed from the supplied data slice
+& Training and evaluation may use different $\bar D$ values \\[3pt]
+Network and budget
+& Separate actor and critic MLPs with $[256,256]$ hidden layers; nominal 400k training steps
+& Actual PPO rollout-aligned count can exceed nominal budget \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \subsection{Diesel supply-chain scope and assumptions}
