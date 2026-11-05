@@ -373,9 +373,10 @@ masking or dispatch architecture.}
 \caption{Joint replenishment and dispatch learning: RLInv vs.\ A6 (cleaner
 practical replenishment comparison; dispatch is re-trained under a
 reduced action space) and vs.\ TrackB
-(shown for context; confounds ordering and dispatch architecture). Paired
-$t$-test significance shown where applicable: * $p<0.05$, ***
-$p<0.001$, ns = not significant. Error bars: 95\% CI, $n=10$ seeds.}
+(shown for context; confounds ordering and dispatch architecture). Unadjusted paired $t$-test significance:
+* $p<0.05$, *** $p<0.001$, ns = not significant.
+Holm-adjusted inference is reported in the text.
+Error bars: 95\% CI, $n=10$ seeds.
 \label{fig:ablation_h1}
 \end{figure}
 
@@ -386,8 +387,9 @@ $p<0.001$, ns = not significant. Error bars: 95\% CI, $n=10$ seeds.}
 dispatch) \revised{use the same classical $(s,S)$ policy class}; A6 retains
 the full 11-dimensional observation while TrackB's dispatch agent uses a
 reduced 6-dimensional observation (Chapter~\ref{chap:methodology}), so
-this comparison differs in both masking and observation design, not
-masking alone. \revised{The archived configurations show large
+\revised{this comparison differs in masking, observation
+design and action handling, with an additional calibration
+difference under Extreme logistics.} \revised{The archived configurations show large
 EENS differences under Monsoon ($d_z=-10.2$,
 $p<0.0001$) and Extreme ($d_z=-4.6$,
 $p<0.0001$), both favouring A6
