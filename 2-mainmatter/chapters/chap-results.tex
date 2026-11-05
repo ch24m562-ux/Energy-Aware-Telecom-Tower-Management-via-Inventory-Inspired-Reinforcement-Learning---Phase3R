@@ -630,11 +630,12 @@ accommodate the extreme-scenario range.}
 \label{fig:distributional_robustness}
 \end{figure}
 
-Policy rankings are preserved across all four scenarios and all three
-alternative distributions, and the mean absolute change in EENS
-relative to the training (geometric) distribution is smaller for RLInv
-than for B1 in the lognormal comparisons (4.56\,kWh vs.\ 7.62\,kWh at
-$\sigma=0.5$).
+Across all four scenarios, policy rankings are
+preserved under the three alternative delivery-time
+distributions. In the lognormal comparisons, RLInv
+has a smaller mean absolute EENS change than B1
+(4.56\,kWh versus 7.62\,kWh at $\sigma=0.5$),
+relative to the geometric training distribution.
 
 The preserved rankings indicate that the main comparison is not
 sensitive to the particular lead-time distribution tested, and if
@@ -1077,16 +1078,15 @@ isolated causal effects of learning.}}
 
 \begin{revisedblock}
 Table~\ref{tab:null_reliability_decomposition}
-makes the sequential comparison explicit. Without
-replenishment, greedy diesel dispatch reduces
-ten-site mean EENS by 136.562\,kWh per episode
-in all four logistics scenarios. These no-order
-reference controllers are scenario-invariant.
-Maximum feasible replenishment further reduces
-EENS, although these descriptive contrasts do
-not isolate a causal contribution of reinforcement
-learning. Masked-random joint actions instead yield
-111.695--116.605\,kWh across the four scenarios.
+presents the sequential comparison. Greedy diesel
+dispatch without replenishment reduces mean EENS
+by 136.562\,kWh per episode in all four scenarios.
+The no-order controllers are scenario-invariant.
+Maximum feasible replenishment reduces EENS further,
+but this descriptive comparison does not isolate
+the causal contribution of reinforcement learning.
+Masked-random joint actions yield EENS between
+111.695 and 116.605\,kWh across the four scenarios.
 
 For the deterministic-grid evaluation, PV,
 grid, and battery follow a fixed dispatch
@@ -1112,14 +1112,14 @@ which replenishment policy is globally optimal; stockout, constraint
 and temporal effects also matter.
 
 
-A supplementary post-hoc comparison using the
-implemented reward function, normalised by each
-site's mean hourly load, ranked RLInv tied third
-under Normal logistics, sixth under Delayed,
-seventh under Monsoon, and sixth under Extreme
-logistics among twenty evaluated controller
-configurations. Always-order-max achieved the
-highest observed score in all four scenarios.
+A supplementary post-hoc comparison evaluated
+twenty controller configurations using the
+implemented reward, normalised by each site's
+mean hourly load. RLInv ranked tied third under
+Normal logistics, sixth under Delayed, seventh
+under Monsoon, and sixth under Extreme logistics.
+Always-order-max achieved the highest observed
+reward in every scenario.
 
 Relative to the no-DG/no-order reference and the
 highest-scoring evaluated controller, RLInv
@@ -1325,11 +1325,12 @@ positive accepted orders, not an additional outcome.}}
 
 \begin{revisedblock}
 
+The ordering results are presented in
 Tables~\ref{tab:g4_order_quantity_subset}
-and~\ref{tab:g4_order_waterfall} show that,
-under Normal logistics, all four controllers
-use approximately 194.2\,kWh of diesel energy
-per episode and have similar EENS.
+and~\ref{tab:g4_order_waterfall}.
+Under Normal logistics, all four controllers
+consume approximately 194.2\,kWh of diesel
+energy per episode and record similar EENS.
 
 RLInv accepts 2.114 orders per episode,
 averaging 137.385\,kWh per order. The
@@ -1453,14 +1454,13 @@ decisions were timed, and the median latency
 was calculated. The reported value is the
 median across these 15 model-level results.
 
-Two measurements are reported: policy-call
-latency, which times the model prediction
-interface, and controller-call latency, which
-additionally includes observation 
-normalisation
-and the implemented action-selection interface.
-Both exclude simulator stepping and external
-communication.
+Two latency measures are reported.
+Policy-call latency measures the model's
+prediction interface. Controller-call latency
+also includes observation normalisation and
+the implemented action-selection interface.
+Neither measurement includes simulator
+stepping or external communication.
 
 
 \begin{table}[htbp]
