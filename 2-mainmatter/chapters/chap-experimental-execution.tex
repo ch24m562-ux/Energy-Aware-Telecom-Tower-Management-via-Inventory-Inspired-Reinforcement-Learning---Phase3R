@@ -389,13 +389,14 @@ established that the saved observation-normalisation
 statistics were consistent with training-only
 updates and were not updated by held-out evaluation.
 
-One historical reproducibility limitation remains:
-the exact source-code revision contemporaneous with
-the original A7 training cannot be independently
-established. This limits reconstruction of the
-original training process, but does not invalidate
-the verified checkpoint identity or the reproducibility
-of its recorded evaluation outcomes.
+One limitation remains concerning the original
+A7 training. The exact code version used during
+training cannot be independently confirmed.
+
+This limits reconstruction of the training process.
+However, the saved model and normalisation files
+have been verified, and the recorded evaluation
+results have been reproduced.
 
 Accordingly, the comparative results are interpreted
 as matched evaluations of the available controller
